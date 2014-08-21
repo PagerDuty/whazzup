@@ -15,15 +15,20 @@ describe 'Galera health check' do
     app.set(:wsrep_state_dir, 'spec/data/3_node_cluster_synced')
   end
 
-  it 'a synced node should be marked up' do
+  it 'should be marked up if it is a a synced node' do
     get '/'
-    expect(last_response).to be_ok
-    expect(last_response.body).to eq('OK')
+    expect(last_response.status).to be(200)
   end
 
-  it 'a donor node in a cluster should be marked down' do
+  it 'should be marked down if it is a donor node' do
     app.set(:wsrep_state_dir, 'spec/data/3_node_cluster_donor')
     get '/'
     expect(last_response.status).to be(503)
+  end
+
+  it 'should be marked up if it is a donor node in a 2 node cluster' do
+    app.set(:wsrep_state_dir, 'spec/data/2_node_cluster_donor')
+    get '/'
+    expect(last_response.status).to be(200)
   end
 end

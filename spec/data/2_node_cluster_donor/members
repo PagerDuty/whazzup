@@ -1,0 +1,4 @@
+# idx,uuid,name,addr
+0,67d339ca-25f1-11e4-8d8d-32700e67a1b7,lt-xdb06,ec2-54-188-43-242.us-west-2.compute.amazonaws.com:3306
+1,b453cb6b-25f0-11e4-abc1-ee0853694724,lt-xdb04,ec2-54-203-159-10.us-west-2.compute.amazonaws.com:3306
+
