@@ -54,4 +54,11 @@ describe 'Galera health check' do
     get '/'
     expect(last_response.status).to be(503)
   end
+
+  it 'should be marked down if there is trouble connecting to the database' do
+    expect_any_instance_of(Mysql2::Client).to receive(:query).and_raise(Mysql2::Error, 'mocking connection failure')
+
+    get '/'
+    expect(last_response.status).to be(503)
+  end
 end

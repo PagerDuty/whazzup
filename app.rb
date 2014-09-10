@@ -27,8 +27,12 @@ get '/' do
   state_info['wsrep_local_status'] = state
   state_info['cluster_size'] = size
 
-  results = db_client.query("SELECT available FROM state WHERE host_name = '#{settings.hostname}'")
-  health_check_state = results.first ? results.first['available'] : 0
+  begin
+    results = db_client.query("SELECT available FROM state WHERE host_name = '#{settings.hostname}'")
+    health_check_state = results.first ? results.first['available'] : 0
+  rescue => e
+    health_check_state = 0
+  end
   state_info['health_check.state'] = health_check_state
 
   up = case state
