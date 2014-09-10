@@ -11,6 +11,10 @@ describe 'Galera health check' do
     Sinatra::Application
   end
 
+  def db_client
+    app.send(:db_client)
+  end
+
   before do
     app.set(:wsrep_state_dir, 'spec/data/3_node_cluster_synced')
   end
@@ -30,5 +34,16 @@ describe 'Galera health check' do
     app.set(:wsrep_state_dir, 'spec/data/2_node_cluster_donor')
     get '/'
     expect(last_response.status).to be(200)
+  end
+
+  it 'should be marked down if it is marked down in the database' do
+    begin
+      db_client.query("update state set available = 0 where host_name = 'test.local'")
+
+      get '/'
+      expect(last_response.status).to be(503)
+    ensure
+      db_client.query("update state set available = 1 where host_name = 'test.local'")
+    end
   end
 end

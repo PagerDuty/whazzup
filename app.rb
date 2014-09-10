@@ -15,7 +15,7 @@ configure :development do
 end
 
 configure :test do
-  set :hostname, 'dev.local'
+  set :hostname, 'test.local'
 end
 
 get '/' do
@@ -27,12 +27,7 @@ get '/' do
   state_info['wsrep_local_status'] = state
   state_info['cluster_size'] = size
 
-  client = Mysql2::Client.new(
-    host: 'localhost',
-    username: 'root', 
-    database: 'health_check')
-
-  results = client.query("SELECT available FROM state WHERE host_name = '#{settings.hostname}'")
+  results = db_client.query("SELECT available FROM state WHERE host_name = '#{settings.hostname}'")
   health_check_state = results.first['available']
   state_info['health_check.state'] = health_check_state
 
@@ -54,4 +49,12 @@ get '/' do
   else
     [503, JSON.generate(state_info)]
   end
+end
+
+def db_client
+  @db_client ||= Mysql2::Client.new(
+    host: 'localhost',
+    username: 'root', 
+    database: 'health_check'
+  )
 end
