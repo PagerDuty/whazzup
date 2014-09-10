@@ -21,8 +21,12 @@ end
 get '/' do
   state_info = {}
 
-  state = File.read(File.join(settings.wsrep_state_dir, 'status')).strip
-  size = File.read(File.join(settings.wsrep_state_dir, 'size')).strip.to_i
+  begin
+    state = File.read(File.join(settings.wsrep_state_dir, 'status')).strip
+    size = File.read(File.join(settings.wsrep_state_dir, 'size')).strip.to_i
+  rescue => e
+    # TODO log the exception here
+  end
 
   state_info['wsrep_local_status'] = state
   state_info['cluster_size'] = size

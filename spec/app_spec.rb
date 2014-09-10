@@ -37,6 +37,12 @@ describe 'Galera health check' do
     expect(last_response.status).to be(200)
   end
 
+  it 'should be marked down if the wsrep state files cannot be read' do
+    app.set(:wsrep_state_dir, 'does/not/exist')
+    get '/'
+    expect(last_response.status).to be(503)
+  end
+
   it 'should be marked down if it is marked down in the database' do
     begin
       db_client.query("update state set available = 0 where host_name = 'test.local'")
