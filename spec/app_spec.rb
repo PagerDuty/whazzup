@@ -12,7 +12,7 @@ describe 'Galera health check' do
   end
 
   def db_client
-    app.send(:db_client)
+    @db_client ||= Mysql2::Client.new(app.connection_settings)
   end
 
   before do

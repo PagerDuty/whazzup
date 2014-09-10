@@ -10,22 +10,27 @@ end
 
 configure :development do
   set :wsrep_state_dir, 'spec/data/3_node_cluster_synced'
-
+  set :connection_settings, {
+    host: 'localhost',
+    username: 'root', 
+    database: 'health_check'
+  }
   set :hostname, 'dev.local'
 end
 
 configure :test do
+  set :connection_settings, {
+    host: 'localhost',
+    username: 'root', 
+    database: 'health_check'
+  }
   set :hostname, 'test.local'
 end
 
 get '/' do
   checker = GaleraHealthChecker.new(
     wsrep_state_dir: settings.wsrep_state_dir,
-    connection_settings: {
-      host: 'localhost',
-      username: 'root', 
-      database: 'health_check'
-    },
+    connection_settings: settings.connection_settings,
     hostname: settings.hostname
   )
 
@@ -100,12 +105,9 @@ class GaleraHealthChecker
 
     return health_check_state == 1
   end
+
+  def db_client
+    @db_client ||= Mysql2::Client.new(connection_settings)
+  end
 end
 
-def db_client
-  @db_client ||= Mysql2::Client.new(
-    host: 'localhost',
-    username: 'root', 
-    database: 'health_check'
-  )
-end
