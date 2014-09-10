@@ -17,6 +17,7 @@ describe 'Galera health check' do
 
   before do
     app.set(:wsrep_state_dir, 'spec/data/3_node_cluster_synced')
+    app.set(:hostname, 'test.local')
   end
 
   it 'should be marked up if it is a a synced node' do
@@ -45,5 +46,12 @@ describe 'Galera health check' do
     ensure
       db_client.query("update state set available = 1 where host_name = 'test.local'")
     end
+  end
+
+  it 'should be marked down if no row is found for the desired host in the DB' do
+    app.set(:hostname, 'does.not.exist')
+
+    get '/'
+    expect(last_response.status).to be(503)
   end
 end
