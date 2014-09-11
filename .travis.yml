@@ -1,0 +1,10 @@
+branches:
+  only:
+    - master
+cache:
+  bundler: true
+language: ruby
+rvm:
+- 2.1.2
+before_script:
+  - bundle exec rake db:setup
