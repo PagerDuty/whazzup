@@ -1,4 +1,4 @@
-require 'rspec'
+require 'spec_helper'
 
 require 'health_checker'
 
@@ -9,6 +9,15 @@ describe HealthChecker do
   it 'should only check status once within a short time window' do
     expect(service_checker).to receive(:check).once
     expect(service_checker).to receive(:check_details).once
+    5.times { checker.check }
+  end
+
+  it 'should check the service again after 1 second' do
+    expect(service_checker).to receive(:check).twice
+    expect(service_checker).to receive(:check_details).twice
+
+    5.times { checker.check }
+    Timecop.travel(1)
     5.times { checker.check }
   end
 

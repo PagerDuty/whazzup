@@ -14,3 +14,7 @@ group :development do
   gem 'rake'
   gem 'travis'
 end
+
+group :test do
+  gem 'timecop'
+end
