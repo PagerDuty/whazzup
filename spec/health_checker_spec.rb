@@ -21,6 +21,17 @@ describe HealthChecker do
     5.times { checker.check }
   end
 
-  it 'should ensure only a single thread is checking status at a time'
+  it 'should ensure only a single thread is checking status at a time' do
+    expect(service_checker).to receive(:check) { sleep(0.1) }.once
+    expect(service_checker).to receive(:check_details).once
+
+    threads = 5.times.map {
+      Thread.new do
+        checker.check
+      end
+    }
+    threads.each {|t| t.join }
+  end
+
   it 'should handle the case where the check results are too stale'
 end
