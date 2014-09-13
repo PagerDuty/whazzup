@@ -11,5 +11,6 @@ gem 'rack-test', groups: [:development, :test]
 gem 'pry', groups: [:development, :test]
 
 group :development do
+  gem 'rake'
   gem 'travis'
 end
