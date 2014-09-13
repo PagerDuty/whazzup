@@ -9,3 +9,8 @@ gem 'mysql2', '~> 0.3.16'
 gem 'rspec', groups: [:development, :test]
 gem 'rack-test', groups: [:development, :test]
 gem 'pry', groups: [:development, :test]
+
+group :development do
+  gem 'rake'
+  gem 'travis'
+end
