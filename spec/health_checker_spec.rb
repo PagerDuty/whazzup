@@ -3,8 +3,8 @@ require 'spec_helper'
 require 'health_checker'
 
 describe HealthChecker do
-  let (:service_checker) { double }
-  let (:checker) { HealthChecker.new(service_checker) }
+  let(:service_checker) { double }
+  let!(:checker) { HealthChecker.new(service_checker: service_checker) }
 
   it 'should only check status once within a short time window' do
     expect(service_checker).to receive(:check).once

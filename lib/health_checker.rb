@@ -1,10 +1,14 @@
 require 'thread'
+require 'logger'
 
 class HealthChecker
   CHECK_MUTEX = Mutex.new
 
-  def initialize(service_checker)
-    @service_checker = service_checker
+  attr_accessor :logger
+
+  def initialize(settings = {})
+    @service_checker = settings[:service_checker]
+    self.logger = settings[:logger] || Logger.new('/dev/null')
 
     @check_interval = 1 # second
 
@@ -18,6 +22,9 @@ class HealthChecker
       if check_now?
         @last_check_results = @service_checker.check
         @last_check_details = @service_checker.check_details
+
+        logger.debug { "Results: #{@last_check_results}" }
+        logger.debug { "Details: #{@last_check_details}" }
 
         @last_check_time = Time.now
       end

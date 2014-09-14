@@ -2,12 +2,16 @@ require 'sinatra'
 require 'mysql2'
 require 'json'
 
+require_relative 'lib/health_checker'
 require_relative 'lib/galera_health_checker'
 
 configure do
   set :wsrep_state_dir, '/etc/mysql/wsrep'
 
   set(:hostname) { `hostname` }
+
+  set :check_logger, Logger.new('log/check.log')
+  set :checkers, {}
 end
 
 configure :development do
@@ -18,6 +22,8 @@ configure :development do
     database: 'health_check'
   }
   set :hostname, 'dev.local'
+
+  set :check_logger, Logger.new(STDOUT)
 end
 
 configure :test do
@@ -27,18 +33,31 @@ configure :test do
     database: 'health_check'
   }
   set :hostname, 'test.local'
+
+  set :check_logger, Logger.new('/dev/null')
 end
 
 get '/' do
-  checker = GaleraHealthChecker.new(
-    wsrep_state_dir: settings.wsrep_state_dir,
-    connection_settings: settings.connection_settings,
-    hostname: settings.hostname
-  )
+  checker = galera_checker
 
   if checker.check
     [200, JSON.generate(checker.check_details)]
   else
     [503, JSON.generate(checker.check_details)]
   end
+end
+
+def galera_checker
+  settings.checkers[:galera] ||= begin
+                                   service_checker = GaleraHealthChecker.new(
+                                     wsrep_state_dir: settings.wsrep_state_dir,
+                                     connection_settings: settings.connection_settings,
+                                     hostname: settings.hostname,
+                                     logger: settings.check_logger
+                                   )
+                                   HealthChecker.new(
+                                     service_checker: service_checker,
+                                     logger: settings.check_logger
+                                   )
+                                 end
 end

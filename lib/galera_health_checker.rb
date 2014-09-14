@@ -1,7 +1,11 @@
+require 'logger'
+
 class GaleraHealthChecker
   attr_accessor :wsrep_state_dir
   attr_accessor :connection_settings
   attr_accessor :hostname
+
+  attr_accessor :logger
 
   # Returns an object that should be passed back to the client to give details
   # on the state of the service
@@ -11,10 +15,13 @@ class GaleraHealthChecker
     self.wsrep_state_dir = settings[:wsrep_state_dir]
     self.connection_settings = settings[:connection_settings]
     self.hostname = settings[:hostname]
+    self.logger = settings[:logger] || Logger.new('/dev/null')
   end
 
   # Returns true if the service is up
   def check
+    logger.debug { "Checking galera health" }
+
     check_details = {}
 
     up = check_wsrep_state(check_details)

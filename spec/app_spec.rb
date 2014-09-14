@@ -18,6 +18,8 @@ describe 'Galera health check' do
   before do
     app.set(:wsrep_state_dir, 'spec/data/3_node_cluster_synced')
     app.set(:hostname, 'test.local')
+
+    app.settings.checkers.clear
   end
 
   it 'should be marked up if it is a a synced node' do
