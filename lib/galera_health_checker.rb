@@ -39,7 +39,7 @@ class GaleraHealthChecker
       state = File.read(File.join(wsrep_state_dir, 'status')).strip
       size = File.read(File.join(wsrep_state_dir, 'size')).strip.to_i
     rescue => e
-      # TODO log the exception here
+      logger.error { "#{e.message}\n#{e.backtrace.join("\n")}" }
     end
 
     check_details['wsrep_local_status'] = state
@@ -62,7 +62,7 @@ class GaleraHealthChecker
       results = db_client.query("SELECT available FROM state WHERE host_name = '#{hostname}'")
       health_check_state = results.first ? results.first['available'] : 0
     rescue => e
-      # TODO log the exception here
+      logger.error { "#{e.message}\n#{e.backtrace.join("\n")}" }
       health_check_state = 0
     end
 
