@@ -37,8 +37,8 @@ configure :test do
   set :check_logger, Logger.new('/dev/null')
 end
 
-get '/' do
-  checker = galera_checker
+get '/xdb' do
+  checker = xdb_checker
 
   if checker.check
     [200, JSON.generate(checker.check_details)]
@@ -47,17 +47,17 @@ get '/' do
   end
 end
 
-def galera_checker
-  settings.checkers[:galera] ||= begin
-                                   service_checker = GaleraHealthChecker.new(
-                                     wsrep_state_dir: settings.wsrep_state_dir,
-                                     connection_settings: settings.connection_settings,
-                                     hostname: settings.hostname,
-                                     logger: settings.check_logger
-                                   )
-                                   HealthChecker.new(
-                                     service_checker: service_checker,
-                                     logger: settings.check_logger
-                                   )
-                                 end
+def xdb_checker
+  settings.checkers[:xdb] ||= begin
+                                service_checker = GaleraHealthChecker.new(
+                                  wsrep_state_dir: settings.wsrep_state_dir,
+                                  connection_settings: settings.connection_settings,
+                                  hostname: settings.hostname,
+                                  logger: settings.check_logger
+                                )
+                                HealthChecker.new(
+                                  service_checker: service_checker,
+                                  logger: settings.check_logger
+                                )
+                              end
 end

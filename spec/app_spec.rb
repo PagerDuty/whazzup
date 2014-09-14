@@ -23,25 +23,25 @@ describe 'Galera health check' do
   end
 
   it 'should be marked up if it is a a synced node' do
-    get '/'
+    get '/xdb'
     expect(last_response.status).to be(200)
   end
 
   it 'should be marked down if it is a donor node' do
     app.set(:wsrep_state_dir, 'spec/data/3_node_cluster_donor')
-    get '/'
+    get '/xdb'
     expect(last_response.status).to be(503)
   end
 
   it 'should be marked up if it is a donor node in a 2 node cluster' do
     app.set(:wsrep_state_dir, 'spec/data/2_node_cluster_donor')
-    get '/'
+    get '/xdb'
     expect(last_response.status).to be(200)
   end
 
   it 'should be marked down if the wsrep state files cannot be read' do
     app.set(:wsrep_state_dir, 'does/not/exist')
-    get '/'
+    get '/xdb'
     expect(last_response.status).to be(503)
   end
 
@@ -49,7 +49,7 @@ describe 'Galera health check' do
     begin
       db_client.query("update state set available = 0 where host_name = 'test.local'")
 
-      get '/'
+      get '/xdb'
       expect(last_response.status).to be(503)
     ensure
       db_client.query("update state set available = 1 where host_name = 'test.local'")
@@ -59,14 +59,14 @@ describe 'Galera health check' do
   it 'should be marked down if no row is found for the desired host in the DB' do
     app.set(:hostname, 'does.not.exist')
 
-    get '/'
+    get '/xdb'
     expect(last_response.status).to be(503)
   end
 
   it 'should be marked down if there is trouble connecting to the database' do
     expect_any_instance_of(Mysql2::Client).to receive(:query).and_raise(Mysql2::Error, 'mocking connection failure')
 
-    get '/'
+    get '/xdb'
     expect(last_response.status).to be(503)
   end
 end
