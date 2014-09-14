@@ -1,10 +1,7 @@
 require 'sinatra'
-require 'mysql2'
 require 'json'
 
 require_relative 'lib/health_checker'
-require_relative 'lib/galera_health_checker'
-
 configure do
   set :wsrep_state_dir, '/etc/mysql/wsrep'
 
@@ -49,6 +46,8 @@ end
 
 def xdb_checker
   settings.checkers[:xdb] ||= begin
+                                require_relative 'lib/galera_health_checker'
+
                                 service_checker = GaleraHealthChecker.new(
                                   wsrep_state_dir: settings.wsrep_state_dir,
                                   connection_settings: settings.connection_settings,

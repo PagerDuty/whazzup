@@ -1,4 +1,5 @@
 require 'logger'
+require 'mysql2'
 
 class GaleraHealthChecker
   attr_accessor :wsrep_state_dir
