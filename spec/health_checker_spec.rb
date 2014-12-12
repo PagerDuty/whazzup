@@ -4,7 +4,7 @@ require 'health_checker'
 
 describe HealthChecker do
   let(:service_checker) { double }
-  let!(:checker) { HealthChecker.new(service_checker: service_checker) }
+  let!(:checker) { HealthChecker.new(service_checker: service_checker, max_staleness: 120) }
 
   it 'should only check status once within a short time window' do
     expect(service_checker).to receive(:check).once
@@ -33,5 +33,11 @@ describe HealthChecker do
     threads.each {|t| t.join }
   end
 
-  it 'should handle the case where the check results are too stale'
+  it 'should handle the case where the check results are too stale' do
+    expect(service_checker).to receive(:check) { sleep(0.1) }.once
+    expect(service_checker).to receive(:check_details).once
+    expect(checker).to receive(:stale?).once
+
+    checker.check
+  end
 end

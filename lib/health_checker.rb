@@ -8,6 +8,7 @@ class HealthChecker
 
   def initialize(settings = {})
     @service_checker = settings[:service_checker]
+    @max_staleness = settings[:max_staleness]
     self.logger = settings[:logger] || Logger.new('/dev/null')
 
     @check_interval = 1 # second
@@ -18,6 +19,8 @@ class HealthChecker
   end
 
   def check
+    return false if stale?
+
     CHECK_MUTEX.synchronize do
       if check_now?
         @last_check_results = @service_checker.check
@@ -44,5 +47,10 @@ class HealthChecker
     else
       true
     end
+  end
+
+  def stale?
+    return false if @last_check_time.nil?
+    (Time.now - @last_check_time) > @max_staleness
   end
 end
