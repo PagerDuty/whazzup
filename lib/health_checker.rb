@@ -20,12 +20,14 @@ class HealthChecker
     # Initialize with a call to perform check so checks aren't initially seen as stale
     perform_check
 
-    @monitor_thread = Thread.new { monitor_service }
+    @keep_checking = true
+    @monitor_thread = Thread.new do
+      Thread.current.abort_on_exception = true
+      monitor_service
+    end
   end
 
   def check
-    logger.debug { 'Monitoring thread died' } unless still_monitoring?
-
     stale? ? false : @last_check_results
   end
 
@@ -36,7 +38,7 @@ class HealthChecker
   private
 
   def monitor_service
-    while true
+    while @keep_checking
       perform_check if check_now?
       sleep @check_interval
     end
@@ -57,10 +59,6 @@ class HealthChecker
     end
   end
 
-  def still_monitoring?
-    !!@monitor_thread.status
-  end
-
   def check_now?
     if @last_check_time
       (Time.now - @last_check_time) > @check_interval
@@ -75,5 +73,10 @@ class HealthChecker
     else
       true
     end
+  end
+
+  def shutdown
+    @keep_checking = false
+    @monitor_thread.join
   end
 end
