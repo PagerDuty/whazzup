@@ -20,6 +20,8 @@ configure :development do
   }
   set :hostname, 'dev.local'
 
+  set :max_staleness, 120 # 2 minutes
+
   set :check_logger, Logger.new(STDOUT)
 end
 
@@ -30,6 +32,8 @@ configure :test do
     database: 'health_check'
   }
   set :hostname, 'test.local'
+
+  set :max_staleness, 120 # 2 minutes
 
   set :check_logger, Logger.new('/dev/null')
 end
@@ -56,6 +60,7 @@ def xdb_checker
                                 )
                                 HealthChecker.new(
                                   service_checker: service_checker,
+                                  max_staleness: settings.max_staleness,
                                   logger: settings.check_logger
                                 )
                               end
