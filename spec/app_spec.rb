@@ -8,7 +8,7 @@ describe 'Galera health check' do
   include Rack::Test::Methods
 
   def app
-    Sinatra::Application
+    Whazzup
   end
 
   def db_client
