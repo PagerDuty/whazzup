@@ -33,6 +33,8 @@ GEM
       coderay (~> 1.0)
       method_source (~> 0.8)
       slop (~> 3.4)
+    puma (1.6.3)
+      rack (~> 1.2)
     pusher-client (0.6.0)
       json
       websocket (~> 1.0)
@@ -82,6 +84,7 @@ PLATFORMS
 DEPENDENCIES
   mysql2 (~> 0.3.16)
   pry
+  puma
   rack-test
   rake
   rspec

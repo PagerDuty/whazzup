@@ -4,6 +4,7 @@ source "https://rubygems.org"
 ruby '2.1.2'
 
 gem 'sinatra', '~> 1.4.5'
+gem 'puma'
 
 gem 'rspec', groups: [:development, :test]
 gem 'rack-test', groups: [:development, :test]
