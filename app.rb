@@ -1,5 +1,6 @@
 require 'sinatra'
 require 'json'
+require 'yaml'
 
 require_relative 'lib/health_checker'
 
@@ -11,6 +12,17 @@ class Whazzup < Sinatra::Base
 
     set :check_logger, Logger.new('log/check.log')
     set :checkers, {}
+  end
+
+  configure :production do
+    config = YAML.load_file ENV['WHAZZUP_CONFIG']
+    set :connection_settings, {
+      host: 'localhost',
+      username: config['connection_settings']['username'],
+      password: config['connection_settings']['password']
+    }
+
+    set :max_staleness, 120 # 2 minutes
   end
 
   configure :development do
