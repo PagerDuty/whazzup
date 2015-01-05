@@ -19,7 +19,8 @@ class Whazzup < Sinatra::Base
     set :connection_settings, {
       host: 'localhost',
       username: config['connection_settings']['username'],
-      password: config['connection_settings']['password']
+      password: config['connection_settings']['password'],
+      database: 'health_check'
     }
 
     set :max_staleness, 120 # 2 minutes
