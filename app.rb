@@ -8,7 +8,7 @@ class Whazzup < Sinatra::Base
   configure do
     set :wsrep_state_dir, '/etc/mysql/wsrep'
 
-    set(:hostname) { `hostname` }
+    set(:hostname) { `hostname`.chomp }
 
     set :check_logger, Logger.new('log/check.log')
     set :checkers, {}
