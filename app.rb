@@ -50,7 +50,9 @@ class Whazzup < Sinatra::Base
     }
     set :hostname, 'test.local'
 
-    set :check_logger, Logger.new('/dev/null')
+    logger = Logger.new('/dev/null')
+    logger.level = Logger::DEBUG
+    set :check_logger, logger
   end
 
   get '/xdb' do
