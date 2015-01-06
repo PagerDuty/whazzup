@@ -52,8 +52,8 @@ class HealthChecker
       @last_check_results = last_check_results
       @last_check_details = last_check_details
 
-      logger.debug { "Results: #{@last_check_results}" }
-      logger.debug { "Details: #{@last_check_details}" }
+      logger.log { "Results: #{@last_check_results}" }
+      logger.log { "Details: #{@last_check_details}" }
 
       @last_check_time = Time.now
     end
