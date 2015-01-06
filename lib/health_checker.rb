@@ -1,5 +1,6 @@
 require 'thread'
 require 'logger'
+require 'statsd'
 
 class HealthChecker
   CHECK_MUTEX = Mutex.new
@@ -49,11 +50,13 @@ class HealthChecker
     last_check_details = @service_checker.check_details
 
     CHECK_MUTEX.synchronize do
+      logger.log(logger.level) { status_changed_message } if status_changed?(last_check_results)
+
       @last_check_results = last_check_results
       @last_check_details = last_check_details
 
-      logger.debug { "Results: #{@last_check_results}" }
-      logger.debug { "Details: #{@last_check_details}" }
+      logger.log(logger.level) { "Results: #{@last_check_results}" }
+      logger.log(logger.level) { "Details: #{@last_check_details}" }
 
       @last_check_time = Time.now
     end
@@ -67,6 +70,15 @@ class HealthChecker
     end
   end
 
+  def log_and_track_change
+    log_change
+    track_change
+  end
+
+  def log_change
+    logger.log { status_changed_message }
+  end
+
   def stale?
     if @last_check_time
       (Time.now - @last_check_time) > @max_staleness
@@ -75,8 +87,24 @@ class HealthChecker
     end
   end
 
+  def status_changed?(new_check_results)
+    @last_check_results ^ new_check_results
+  end
+
+  def status_changed_message
+    if @last_check_results
+      'Status changed from available to unavailable'
+    else
+      'Status changed from unavailable to available'
+    end
+  end
+
   def shutdown
     @keep_checking = false
     @monitor_thread.join
+  end
+
+  def track_change
+    StatsD.event('Status Change', status_changed_message)
   end
 end

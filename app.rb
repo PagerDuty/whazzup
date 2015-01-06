@@ -10,7 +10,9 @@ class Whazzup < Sinatra::Base
 
     set(:hostname) { `hostname`.chomp }
 
-    set :check_logger, Logger.new('log/check.log')
+    logger = Logger.new('log/check.log')
+    logger.level = Logger::INFO
+    set :check_logger, logger
     set :checkers, {}
   end
 
@@ -37,7 +39,9 @@ class Whazzup < Sinatra::Base
 
     set :max_staleness, 120 # 2 minutes
 
-    set :check_logger, Logger.new(STDOUT)
+    logger = Logger.new(STDOUT)
+    logger.level = Logger::DEBUG
+    set :check_logger, logger
   end
 
   configure :test do
@@ -50,7 +54,9 @@ class Whazzup < Sinatra::Base
 
     set :max_staleness, 120 # 2 minutes
 
-    set :check_logger, Logger.new('/dev/null')
+    logger = Logger.new('/dev/null')
+    logger.level = Logger::DEBUG
+    set :check_logger, logger
   end
 
   get '/xdb' do
