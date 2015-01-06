@@ -1,5 +1,6 @@
 require 'thread'
 require 'logger'
+require 'statsd'
 
 class HealthChecker
   CHECK_MUTEX = Mutex.new
@@ -69,6 +70,15 @@ class HealthChecker
     end
   end
 
+  def log_and_track_change
+    log_change
+    track_change
+  end
+
+  def log_change
+    logger.log { status_changed_message }
+  end
+
   def stale?
     if @last_check_time
       (Time.now - @last_check_time) > @max_staleness
@@ -92,5 +102,9 @@ class HealthChecker
   def shutdown
     @keep_checking = false
     @monitor_thread.join
+  end
+
+  def track_change
+    StatsD.event('Status Change', status_changed_message)
   end
 end
