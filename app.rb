@@ -54,7 +54,9 @@ class Whazzup < Sinatra::Base
 
     set :max_staleness, 120 # 2 minutes
 
-    set :check_logger, Logger.new('/dev/null')
+    logger = Logger.new('/dev/null')
+    logger.level = Logger::DEBUG
+    set :check_logger, logger
   end
 
   get '/xdb' do
