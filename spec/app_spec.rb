@@ -69,4 +69,9 @@ describe 'Galera health check' do
     get '/xdb'
     expect(last_response.status).to be(503)
   end
+
+  it 'should support the OPTIONS method for checking health (HAProxy default method)' do
+    options '/xdb'
+    expect(last_response.status).to be(200)
+  end
 end

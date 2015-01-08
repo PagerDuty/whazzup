@@ -54,6 +54,14 @@ class Whazzup < Sinatra::Base
   end
 
   get '/xdb' do
+    check_xdb
+  end
+
+  options '/xdb' do
+    check_xdb
+  end
+
+  def check_xdb
     checker = xdb_checker
 
     if checker.check
