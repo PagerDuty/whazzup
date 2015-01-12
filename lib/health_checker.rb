@@ -49,6 +49,8 @@ class HealthChecker
     last_check_details = @service_checker.check_details
 
     CHECK_MUTEX.synchronize do
+      logger.info { status_changed_message } if status_changed?(last_check_results)
+
       @last_check_results = last_check_results
       @last_check_details = last_check_details
 
@@ -72,6 +74,18 @@ class HealthChecker
       (Time.now - @last_check_time) > @max_staleness
     else
       true
+    end
+  end
+
+  def status_changed?(new_check_results)
+    @last_check_results ^ new_check_results
+  end
+
+  def status_changed_message
+    if @last_check_results
+      'Status changed from available to unavailable'
+    else
+      'Status changed from unavailable to available'
     end
   end
 
