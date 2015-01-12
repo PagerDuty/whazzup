@@ -12,6 +12,8 @@ class Whazzup < Sinatra::Base
 
     set :check_logger, Logger.new('log/check.log')
     set :checkers, {}
+
+    set :max_staleness, 10
   end
 
   configure :production do
@@ -22,8 +24,6 @@ class Whazzup < Sinatra::Base
       password: config['connection_settings']['password'],
       database: 'health_check'
     }
-
-    set :max_staleness, 120 # 2 minutes
   end
 
   configure :development do
@@ -35,8 +35,6 @@ class Whazzup < Sinatra::Base
     }
     set :hostname, 'dev.local'
 
-    set :max_staleness, 120 # 2 minutes
-
     set :check_logger, Logger.new(STDOUT)
   end
 
@@ -47,8 +45,6 @@ class Whazzup < Sinatra::Base
       database: 'health_check'
     }
     set :hostname, 'test.local'
-
-    set :max_staleness, 120 # 2 minutes
 
     set :check_logger, Logger.new('/dev/null')
   end
