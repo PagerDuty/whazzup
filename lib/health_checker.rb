@@ -4,12 +4,14 @@ require 'logger'
 class HealthChecker
   CHECK_MUTEX = Mutex.new
 
-  attr_accessor :logger
+  attr_accessor :logger, :statsd
 
   def initialize(settings = {})
     @service_checker = settings[:service_checker]
     @max_staleness = settings[:max_staleness]
+
     self.logger = settings[:logger] || Logger.new('/dev/null')
+    self.statsd = settings[:statsd]
 
     @check_interval = 1 # second
 
