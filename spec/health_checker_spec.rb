@@ -4,7 +4,8 @@ require 'health_checker'
 
 describe HealthChecker do
   let(:service_checker) { double }
-  let(:checker) { HealthChecker.new(service_checker: service_checker, max_staleness: 120) }
+  let(:statsd) { Statsd.new('0.0.0.0') }
+  let(:checker) { HealthChecker.new(service_checker: service_checker, max_staleness: 120, statsd: statsd) }
 
   after :each do
     checker.send :shutdown rescue nil
@@ -57,6 +58,24 @@ describe HealthChecker do
       expect(checker.check).to be false
     end
 
+    context 'status changes' do
+      let(:failed_check_details) { { up: false } }
+      it 'should emit a statsd event' do
+        allow(service_checker).to receive(:check).once { true }
+        allow(service_checker).to receive(:check_details).once { check_details }
+        checker.check
+        allow(service_checker).to receive(:check).once { false }
+        allow(service_checker).to receive(:check_details).once { failed_check_details }
+
+        expect(statsd).to receive(:event).with(
+          'whazzup.status_changed',
+          'Status changed from available to unavailable'
+        )
+
+        # Use send because we don't want to wait check_interval
+        checker.send :perform_check
+      end
+    end
   end
 
   context 'background monitoring process' do

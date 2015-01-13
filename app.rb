@@ -59,6 +59,8 @@ class Whazzup < Sinatra::Base
     logger = Logger.new('/dev/null')
     logger.level = Logger::DEBUG
     set :check_logger, logger
+
+    set :statsd_host, '0.0.0.0'
   end
 
   get '/xdb' do
@@ -70,12 +72,14 @@ class Whazzup < Sinatra::Base
   end
 
   def check_xdb
-    checker = xdb_checker
+    statsd.time('whazzup.check_xdb') do
+      checker = xdb_checker
 
-    if checker.check
-      [200, JSON.generate(checker.check_details)]
-    else
-      [503, JSON.generate(checker.check_details)]
+      if checker.check
+        [200, JSON.generate(checker.check_details)]
+      else
+        [503, JSON.generate(checker.check_details)]
+      end
     end
   end
 
