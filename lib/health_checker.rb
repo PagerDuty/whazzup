@@ -4,12 +4,14 @@ require 'logger'
 class HealthChecker
   CHECK_MUTEX = Mutex.new
 
-  attr_accessor :logger
+  attr_accessor :logger, :statsd
 
   def initialize(settings = {})
     @service_checker = settings[:service_checker]
     @max_staleness = settings[:max_staleness]
+
     self.logger = settings[:logger] || Logger.new('/dev/null')
+    self.statsd = settings[:statsd]
 
     @check_interval = 1 # second
 
@@ -39,17 +41,18 @@ class HealthChecker
 
   def monitor_service
     while @keep_checking
+      track_current_status
       perform_check if check_now?
       sleep @check_interval
     end
   end
 
   def perform_check
-    last_check_results = @service_checker.check
+    last_check_results = timed_check
     last_check_details = @service_checker.check_details
 
     CHECK_MUTEX.synchronize do
-      logger.info { status_changed_message } if status_changed?(last_check_results)
+      log_and_track_change if status_changed?(last_check_results)
 
       @last_check_results = last_check_results
       @last_check_details = last_check_details
@@ -67,6 +70,15 @@ class HealthChecker
     else
       true
     end
+  end
+
+  def log_and_track_change
+    log_change
+    track_status_change
+  end
+
+  def log_change
+    logger.info { status_changed_message }
   end
 
   def stale?
@@ -92,5 +104,17 @@ class HealthChecker
   def shutdown
     @keep_checking = false
     @monitor_thread.join
+  end
+
+  def timed_check
+    statsd.time('whazzup.check_time') { @service_checker.check }
+  end
+
+  def track_status_change
+    statsd.event('whazzup.status_changed', status_changed_message)
+  end
+
+  def track_current_status
+    statsd.gauge('whazzup.status', @last_check_results ? 1 : 0)
   end
 end

@@ -2,9 +2,12 @@ require 'sinatra'
 require 'json'
 require 'yaml'
 
+require_relative 'lib/statsd_helper'
 require_relative 'lib/health_checker'
 
 class Whazzup < Sinatra::Base
+  helpers Sinatra::StatsdHelper
+
   configure do
     set :wsrep_state_dir, '/etc/mysql/wsrep'
 
@@ -16,6 +19,9 @@ class Whazzup < Sinatra::Base
     set :checkers, {}
 
     set :max_staleness, 10
+
+    set :statsd_host, '127.0.0.1'
+    set :statsd_port, 8125
   end
 
   configure :production do
@@ -32,7 +38,7 @@ class Whazzup < Sinatra::Base
     set :wsrep_state_dir, 'spec/data/3_node_cluster_synced'
     set :connection_settings, {
       host: 'localhost',
-      username: 'root', 
+      username: 'root',
       database: 'health_check'
     }
     set :hostname, 'dev.local'
@@ -45,7 +51,7 @@ class Whazzup < Sinatra::Base
   configure :test do
     set :connection_settings, {
       host: 'localhost',
-      username: 'root', 
+      username: 'root',
       database: 'health_check'
     }
     set :hostname, 'test.local'
@@ -53,6 +59,8 @@ class Whazzup < Sinatra::Base
     logger = Logger.new('/dev/null')
     logger.level = Logger::DEBUG
     set :check_logger, logger
+
+    set :statsd_host, '0.0.0.0'
   end
 
   get '/xdb' do
@@ -64,12 +72,14 @@ class Whazzup < Sinatra::Base
   end
 
   def check_xdb
-    checker = xdb_checker
+    statsd.time('whazzup.check_xdb') do
+      checker = xdb_checker
 
-    if checker.check
-      [200, JSON.generate(checker.check_details)]
-    else
-      [503, JSON.generate(checker.check_details)]
+      if checker.check
+        [200, JSON.generate(checker.check_details)]
+      else
+        [503, JSON.generate(checker.check_details)]
+      end
     end
   end
 
@@ -86,7 +96,8 @@ class Whazzup < Sinatra::Base
                                   HealthChecker.new(
                                     service_checker: service_checker,
                                     max_staleness: settings.max_staleness,
-                                    logger: settings.check_logger
+                                    logger: settings.check_logger,
+                                    statsd: statsd
                                   )
                                 end
   end
