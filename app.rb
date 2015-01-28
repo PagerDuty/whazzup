@@ -1,12 +1,17 @@
 require 'sinatra'
 require 'json'
 require 'yaml'
+require 'active_support/inflector'
 
 require_relative 'lib/statsd_helper'
 require_relative 'lib/health_checker'
 
 class Whazzup < Sinatra::Base
   helpers Sinatra::StatsdHelper
+
+  SERVICE_CHECKERS = {
+    xdb: 'GaleraHealthChecker'
+  }.freeze
 
   configure do
     set :wsrep_state_dir, '/etc/mysql/wsrep'
@@ -22,10 +27,14 @@ class Whazzup < Sinatra::Base
 
     set :statsd_host, '127.0.0.1'
     set :statsd_port, 8125
+
+    set :services, [:xdb]
   end
 
   configure :production do
     config = YAML.load_file ENV['WHAZZUP_CONFIG']
+    set :services, config['services'].map(&:to_sym)
+
     set :connection_settings, {
       host: 'localhost',
       username: config['connection_settings']['username'],
@@ -63,6 +72,11 @@ class Whazzup < Sinatra::Base
     set :statsd_host, '0.0.0.0'
   end
 
+  def initialize
+    super
+    initialize_checkers
+  end
+
   get '/xdb' do
     check_xdb
   end
@@ -84,21 +98,32 @@ class Whazzup < Sinatra::Base
   end
 
   def xdb_checker
-    settings.checkers[:xdb] ||= begin
-                                  require_relative 'lib/galera_health_checker'
+    settings.checkers[:xdb]
+  end
 
-                                  service_checker = GaleraHealthChecker.new(
-                                    wsrep_state_dir: settings.wsrep_state_dir,
-                                    connection_settings: settings.connection_settings,
-                                    hostname: settings.hostname,
-                                    logger: settings.check_logger
-                                  )
-                                  HealthChecker.new(
-                                    service_checker: service_checker,
-                                    max_staleness: settings.max_staleness,
-                                    logger: settings.check_logger,
-                                    statsd: statsd
-                                  )
-                                end
+  def initialize_checkers
+    settings.services.each do |service|
+      checker_class_name = SERVICE_CHECKERS[service]
+      require_relative "lib/#{checker_class_name.underscore}"
+
+      # Initialize and memoize instance of checker class
+      checker_class = checker_class_name.constantize
+      service_checker = checker_class.new(
+        wsrep_state_dir: settings.wsrep_state_dir,
+        connection_settings: settings.connection_settings,
+        hostname: settings.hostname,
+        logger: settings.check_logger
+      )
+
+      settings.checkers[service] = HealthChecker.new(
+        service_checker: service_checker,
+        max_staleness: settings.max_staleness,
+        logger: settings.check_logger,
+        statsd: statsd
+      )
+
+      # Ensure connection by firing an initial check
+      settings.checkers[service].check
+    end
   end
 end

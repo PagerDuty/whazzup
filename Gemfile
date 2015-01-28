@@ -7,6 +7,7 @@ gem 'sinatra', '~> 1.4.5'
 gem 'puma'
 
 gem 'dogstatsd-ruby', '~> 1.4.1'
+gem 'activesupport'
 
 gem 'rspec', groups: [:development, :test]
 gem 'rack-test', groups: [:development, :test]
