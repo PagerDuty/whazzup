@@ -107,6 +107,7 @@ class Whazzup < Sinatra::Base
       require_relative "lib/#{checker_class_name.underscore}"
 
       # Initialize and memoize instance of checker class
+      # TODO: Service specific configs should be pulled from a file, this is xdb specific
       checker_class = checker_class_name.constantize
       service_checker = checker_class.new(
         wsrep_state_dir: settings.wsrep_state_dir,
