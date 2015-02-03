@@ -39,7 +39,8 @@ class Whazzup < Sinatra::Base
       host: 'localhost',
       username: config['connection_settings']['username'],
       password: config['connection_settings']['password'],
-      database: 'health_check'
+      database: 'health_check',
+      reconnect: true
     }
   end
 
@@ -48,7 +49,8 @@ class Whazzup < Sinatra::Base
     set :connection_settings, {
       host: 'localhost',
       username: 'root',
-      database: 'health_check'
+      database: 'health_check',
+      reconnect: true
     }
     set :hostname, 'dev.local'
 
@@ -61,7 +63,8 @@ class Whazzup < Sinatra::Base
     set :connection_settings, {
       host: 'localhost',
       username: 'root',
-      database: 'health_check'
+      database: 'health_check',
+      reconnect: true
     }
     set :hostname, 'test.local'
 
