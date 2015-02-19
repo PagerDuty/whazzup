@@ -13,10 +13,10 @@ class GaleraHealthChecker
   attr_reader :check_details
 
   def initialize(settings = {})
-    self.wsrep_state_dir = settings[:wsrep_state_dir]
-    self.connection_settings = settings[:connection_settings]
-    self.hostname = settings[:hostname]
-    self.logger = settings[:logger] || Logger.new('/dev/null')
+    self.wsrep_state_dir = settings.wsrep_state_dir
+    self.connection_settings = settings.connection_settings
+    self.hostname = settings.hostname
+    self.logger = settings.check_logger || Logger.new('/dev/null')
   end
 
   # Returns true if the service is up
