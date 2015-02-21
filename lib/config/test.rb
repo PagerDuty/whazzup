@@ -1,17 +1,25 @@
-class Whazzup < Sinatra::Base
-  configure :test do
-    set :connection_settings, {
-      host: 'localhost',
-      username: 'root',
-      database: 'health_check',
-      reconnect: true
-    }
-    set :hostname, 'test.local'
+require 'sinatra/base'
 
-    logger = Logger.new('/dev/null')
-    logger.level = Logger::DEBUG
-    set :check_logger, logger
+module Sinatra
+  module Config
+    module Test
+      def self.registered(app)
+        app.configure :test do
+          app.set :connection_settings, {
+            host: 'localhost',
+            username: 'root',
+            database: 'health_check',
+            reconnect: true
+          }
+          app.set :hostname, 'test.local'
 
-    set :statsd_host, '0.0.0.0'
+          logger = Logger.new('/dev/null')
+          logger.level = Logger::DEBUG
+          app.set :check_logger, logger
+
+          app.set :statsd_host, '0.0.0.0'
+        end
+      end
+    end
   end
 end

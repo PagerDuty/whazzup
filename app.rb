@@ -3,14 +3,12 @@ require 'json'
 require 'yaml'
 require 'active_support/inflector'
 
-require_relative 'lib/statsd_helper'
 require_relative 'lib/config'
 require_relative 'lib/routes'
 require_relative 'lib/checkers'
+require_relative 'lib/helpers'
 
 class Whazzup < Sinatra::Base
-  helpers Sinatra::StatsdHelper
-
   def initialize
     super
     initialize_checkers
