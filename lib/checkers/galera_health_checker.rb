@@ -21,7 +21,7 @@ class GaleraHealthChecker
 
   # Returns true if the service is up
   def check
-    logger.debug { "Checking galera health" }
+    logger.debug { 'Checking galera health' }
 
     check_details = {}
 
@@ -32,7 +32,7 @@ class GaleraHealthChecker
 
     @check_details = check_details
 
-    return up
+    up
   end
 
   def check_wsrep_state(check_details)
@@ -55,7 +55,7 @@ class GaleraHealthChecker
            false
          end
 
-    return up
+    up
   end
 
   def check_state_table(check_details)
@@ -69,7 +69,7 @@ class GaleraHealthChecker
 
     check_details['health_check.state'] = health_check_state
 
-    return health_check_state == 1
+    health_check_state == 1
   end
 
   def db_client
