@@ -1,14 +1,35 @@
-require 'sinatra'
+require 'sinatra/base'
 require 'json'
 require 'yaml'
 require 'active_support/inflector'
 
-require_relative 'lib/config'
-require_relative 'lib/routes'
-require_relative 'lib/checkers'
-require_relative 'lib/helpers'
+# General checkers
+require 'lib/checkers/health_checker'
+
+# General helpers
+require_relative 'lib/helpers/statsd_helper'
+
+# config
+require_relative 'config'
 
 class Whazzup < Sinatra::Base
+
+  SERVICE_CHECKERS = {
+    xdb: 'GaleraHealthChecker'
+  }.freeze
+
+  # General extention setup
+  register Sinatra::Config
+  helpers Helpers::StatsdHelper
+
+  # XDB specific extention setup
+  if settings.services.include?(:xdb)
+    require_relative 'routes/xdb'
+    require_relative 'lib/helpers/xdb_helper'
+    helpers Helpers::Xdb
+    register Sinatra::Routing::Xdb
+  end
+
   def initialize
     super
     initialize_checkers
