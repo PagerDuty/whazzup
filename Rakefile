@@ -1,10 +1,11 @@
 require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
 
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.ruby_opts = %w( -I . )
 end
 
-task :default => :spec
+task default: [:rubocop, :spec]
 
 namespace :db do
   def db_client
@@ -32,4 +33,9 @@ namespace :db do
   end
 
   task :setup => [:create, :seed]
+end
+
+desc 'rubocop compliancy checks'
+RuboCop::RakeTask.new(:rubocop) do |t|
+  t.patterns = %w{ lib/**/*.rb lib/*.rb spec/*.rb *.rb }
 end
