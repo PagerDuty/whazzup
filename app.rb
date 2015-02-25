@@ -4,7 +4,7 @@ require 'yaml'
 require 'active_support/inflector'
 
 # General checkers
-require 'lib/checkers/health_checker'
+require_relative 'lib/checkers/health_checker'
 
 # General helpers
 require_relative 'lib/helpers/statsd_helper'
@@ -25,9 +25,8 @@ class Whazzup < Sinatra::Base
   # XDB specific extention setup
   if settings.services.include?(:xdb)
     require_relative 'routes/xdb'
-    require_relative 'lib/helpers/xdb_helper'
-    helpers Helpers::Xdb
     register Sinatra::Routing::Xdb
+    helpers Sinatra::Routing::Xdb
   end
 
   def initialize
