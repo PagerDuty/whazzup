@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-require 'health_checker'
+require 'checkers/health_checker'
 
 describe HealthChecker do
   let(:service_checker) { double }

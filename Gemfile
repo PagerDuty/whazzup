@@ -16,6 +16,7 @@ gem 'pry', groups: [:development, :test]
 group :development do
   gem 'rake'
   gem 'travis'
+  gem 'rb-readline'
 end
 
 group :test do

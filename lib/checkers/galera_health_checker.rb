@@ -13,15 +13,15 @@ class GaleraHealthChecker
   attr_reader :check_details
 
   def initialize(settings = {})
-    self.wsrep_state_dir = settings[:wsrep_state_dir]
-    self.connection_settings = settings[:connection_settings]
-    self.hostname = settings[:hostname]
-    self.logger = settings[:logger] || Logger.new('/dev/null')
+    self.wsrep_state_dir = settings.wsrep_state_dir
+    self.connection_settings = settings.connection_settings
+    self.hostname = settings.hostname
+    self.logger = settings.check_logger || Logger.new('/dev/null')
   end
 
   # Returns true if the service is up
   def check
-    logger.debug { "Checking galera health" }
+    logger.debug { 'Checking galera health' }
 
     check_details = {}
 
@@ -32,7 +32,7 @@ class GaleraHealthChecker
 
     @check_details = check_details
 
-    return up
+    up
   end
 
   def check_wsrep_state(check_details)
@@ -55,7 +55,7 @@ class GaleraHealthChecker
            false
          end
 
-    return up
+    up
   end
 
   def check_state_table(check_details)
@@ -69,7 +69,7 @@ class GaleraHealthChecker
 
     check_details['health_check.state'] = health_check_state
 
-    return health_check_state == 1
+    health_check_state == 1
   end
 
   def db_client

@@ -22,7 +22,7 @@ describe 'Galera health check' do
 
   it 'should require and initialize checkers, and make a first check' do
     Whazzup.set(:services, [:xdb])
-    expect_any_instance_of(Whazzup).to receive(:require_relative).with 'lib/galera_health_checker'
+    expect_any_instance_of(Whazzup).to receive(:require_relative).with 'lib/checkers/galera_health_checker'
 
     service_checker_class = double
     expect(Whazzup::SERVICE_CHECKERS[:xdb]).to receive(:constantize) { service_checker_class }
