@@ -12,7 +12,6 @@ gem 'activesupport'
 gem 'rspec', groups: [:development, :test]
 gem 'rack-test', groups: [:development, :test]
 gem 'pry', groups: [:development, :test]
-gem 'rubocop', groups: [:development, :test]
 
 group :development do
   gem 'rake'
