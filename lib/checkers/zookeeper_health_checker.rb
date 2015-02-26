@@ -72,7 +72,7 @@ class ZookeeperHealthChecker
     timeout_time = zk_connection_settings[:timeout]
     begin
       s = TCPSocket.open(host, port)
-    rescue Errno::ECONNREFUSED => e
+    rescue Errno::ECONNREFUSED
       logger.error { "Connection to #{host}:#{port} was refused" }
       return nil
     end
