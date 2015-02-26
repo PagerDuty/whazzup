@@ -11,18 +11,6 @@ describe 'Zookeeper health check' do
     Whazzup.new
   end
 
-  let(:good_node_data) do
-    ["Zookeeper version: 3.4.5--1, built on 06/10/2013 17:26 GMT",
-    "Latency min/avg/max: 0/0/16",
-    "Received: 867",
-    "Sent: 866",
-    "Connections: 1",
-    "Outstanding: 0",
-    "Zxid: 0x2",
-    "Mode: standalone",
-    "Node count: 4"]
-  end
-
   before do
     Whazzup.set(:hostname, 'test.local')
   end
@@ -42,19 +30,12 @@ describe 'Zookeeper health check' do
     app
   end
 
-  it 'should return 404 on root route' do
-    get '/'
-    expect(last_response.status).to be(404)
-  end
-
   it 'should be marked up if it is a good node' do
-    allow_any_instance_of(ZookeeperHealthChecker).to receive(:get_srvr_data).and_return(good_node_data)
     get '/zk'
     expect(last_response.status).to be(200)
   end
 
   it 'should support the OPTIONS method for checking health (HAProxy default method)' do
-    allow_any_instance_of(ZookeeperHealthChecker).to receive(:get_srvr_data).and_return(good_node_data)
     options '/zk'
     expect(last_response.status).to be(200)
   end
