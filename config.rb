@@ -18,7 +18,7 @@ module Sinatra
         app.set :statsd_host, '127.0.0.1'
         app.set :statsd_port, 8125
 
-        app.set :services, [:xdb]
+        app.set :services, [:xdb, :zk]
       end
 
       app.configure :test do
@@ -28,6 +28,12 @@ module Sinatra
           database: 'health_check',
           reconnect: true
         }
+        app.set :zk_connection_settings, {
+          host: 'localhost',
+          port: 2181,
+          timeout: 5
+        }
+        app.set :zk_outstanding_threshold, 60
         app.set :hostname, 'test.local'
 
         logger = Logger.new('/dev/null')
@@ -45,6 +51,16 @@ module Sinatra
           database: 'health_check',
           reconnect: true
         } if app.settings.services.include?(:xdb)
+
+        if app.settings.services.include?(:zk)
+          app.set :zk_connection_settings, {
+            host: 'localhost',
+            port: 2181,
+            timeout: 5
+          }
+          app.set :zk_outstanding_threshold, 60
+        end
+
         app.set :hostname, 'dev.local'
 
         logger = Logger.new(STDOUT)
@@ -65,6 +81,15 @@ module Sinatra
           database: 'health_check',
           reconnect: true
         } if app.settings.services.include?(:xdb)
+
+        if app.settings.services.include?(:zk)
+          app.set :zk_connection_settings, {
+            host: config['zk']['host'],
+            port: config['zk']['port'],
+            timeout: config['zk']['timeout']
+          }
+          app.set :zk_outstanding_threshold, config['zk']['outstanding_threshold']
+        end
       end
     end
   end
