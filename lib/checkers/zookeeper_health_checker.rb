@@ -13,6 +13,8 @@ class ZookeeperHealthChecker
   # on the state of the service
   attr_reader :check_details
 
+  SRVR_NUMERIC_KEYS = Set.new %w(Received Sent Connections Outstanding Node\ Count)
+
   def initialize(settings = {})
     self.hostname = settings.hostname
     self.logger = settings.check_logger || Logger.new('/dev/null')
@@ -23,45 +25,38 @@ class ZookeeperHealthChecker
   def check
     logger.debug { 'Checking zk health' }
 
-    check_details = {}
+    check_details = {available: false}
+
     srvr_data = get_srvr_data
-    check_details = parse_srvr_data(srvr_data) unless srvr_data.nil?
 
-    check_details['leader'] = if !srvr_data.nil? && (['leader', 'standalone'].include?(check_details['Mode']))
-                                true
-                              else
-                                false
-                              end
+    # Failed to get any zk data so bail out
+    return false if srvr_data.nil?
 
-    check_details['over_outstanding_threshold'] = if !srvr_data.nil? && check_details['Outstanding'] > zk_outstanding_threshold
-                                                    true
-                                                  else
-                                                    false
-                                                  end
+    check_details = parse_srvr_data(srvr_data)
 
-    check_details['available'] = if srvr_data.nil?
-                                    false
-                                  else
-                                    true
-                                  end
+    check_details['leader'] = ['leader', 'standalone'].include?(check_details['Mode'])
+
+    check_details['over_outstanding_threshold'] = check_details['Outstanding'] > zk_outstanding_threshold
+
+    check_details['available'] = true
 
     @check_details = check_details
 
     check_details['available']
   end
 
+  private
+
   def parse_srvr_data(data)
     result = {}
     data.each do |l|
       k,v = l.split(': ')
-      result[k] = v
+      if SRVR_NUMERIC_KEYS.include?(k)
+        result[k] = v.to_i
+      else
+        result[k] = v
+      end
     end
-
-    result['Received'] = result['Received'].to_i
-    result['Sent'] = result['Sent'].to_i
-    result['Connections'] = result['Connections'].to_i
-    result['Outstanding'] = result['Outstanding'].to_i
-    result['Node count'] = result['Node count'].to_i
 
     result
   end
@@ -71,27 +66,68 @@ class ZookeeperHealthChecker
     port = zk_connection_settings[:port]
     timeout_time = zk_connection_settings[:timeout]
     begin
-      s = TCPSocket.open(host, port)
+      s = connect(host, port, timeout_time)
     rescue Errno::ECONNREFUSED
       logger.error { "Connection to #{host}:#{port} was refused" }
+      return nil
+    rescue IOError => e
+      logger.error { e.message }
+      return nil
+    rescue => e
+      logger.error { "#{e.message}\n#{e.backtrace.join("\n")}" }
       return nil
     end
 
     s.send('srvr', 0)
 
-    recv = []
-    begin
-      timeout(timeout_time) do
-        while line = s.gets
-          recv.push(line.chop)
-        end
-      end
-    rescue Timeout::Error => e
-      logger.error { "Connection to #{host}:#{port} timed out after #{timeout_time}s" }
+    if IO.select([s], nil, nil, timeout_time)
+      recv = s.read.split("\n")
+      s.close
+    else
+      s.close
       return nil
     end
-    s.close
 
     recv
+  end
+
+  # Adapted from http://spin.atomicobject.com/2013/09/30/socket-connection-timeout-ruby/
+  def connect(host, port, timeout = 5)
+    # Convert the passed host into structures the non-blocking calls
+    # can deal with and looks address manually to be IPv6 ready
+    addr = Socket.getaddrinfo(host, nil)
+    sockaddr = Socket.pack_sockaddr_in(port, addr[0][3])
+
+    Socket.new(Socket.const_get(addr[0][0]), Socket::SOCK_STREAM, 0).tap do |socket|
+      socket.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
+
+      begin
+        # Initiate the socket connection in the background. If it doesn't fail
+        # immediatelyit will raise an IO::WaitWritable (Errno::EINPROGRESS)
+        # indicating the connection is in progress.
+        socket.connect_nonblock(sockaddr)
+
+      rescue IO::WaitWritable
+        # IO.select will block until the socket is writable or the timeout
+        # is exceeded - whichever comes first.
+        if IO.select(nil, [socket], nil, timeout)
+          begin
+            # Verify there is now a good connection
+            socket.connect_nonblock(sockaddr)
+          rescue Errno::EISCONN
+            # Good news everybody, the socket is connected!
+          rescue
+            # An unexpected exception was raised - the connection is no good.
+            socket.close
+            raise
+          end
+        else
+          # IO.select returns nil when the socket is not ready before timeout
+          # seconds have elapsed
+          socket.close
+          raise IOError, "Connection timeout to #{host}:#{port}"
+        end
+      end
+    end
   end
 end

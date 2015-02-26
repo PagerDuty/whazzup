@@ -17,7 +17,7 @@ module Sinatra
         statsd.time('whazzup.check_zk') do
           checker = settings.checkers[:zk]
 
-          if checker.check && !checker.check_details['over_outstanding_threshold']
+          if checker.check
             [200, JSON.generate(checker.check_details)]
           else
             [503, JSON.generate(checker.check_details)]

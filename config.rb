@@ -50,16 +50,14 @@ module Sinatra
           username: 'root',
           database: 'health_check',
           reconnect: true
-        } if app.settings.services.include?(:xdb)
+        }
 
-        if app.settings.services.include?(:zk)
-          app.set :zk_connection_settings, {
-            host: 'localhost',
-            port: 2181,
-            timeout: 5
-          }
-          app.set :zk_outstanding_threshold, 60
-        end
+        app.set :zk_connection_settings, {
+          host: 'localhost',
+          port: 2181,
+          timeout: 5
+        }
+        app.set :zk_outstanding_threshold, 60
 
         app.set :hostname, 'dev.local'
 
@@ -80,16 +78,14 @@ module Sinatra
           password: config['connection_settings']['password'],
           database: 'health_check',
           reconnect: true
-        } if app.settings.services.include?(:xdb)
+        }
 
-        if app.settings.services.include?(:zk)
-          app.set :zk_connection_settings, {
-            host: config['zk']['host'],
-            port: config['zk']['port'],
-            timeout: config['zk']['timeout']
-          }
-          app.set :zk_outstanding_threshold, config['zk']['outstanding_threshold']
-        end
+        app.set :zk_connection_settings, {
+          host: config['zk']['host'],
+          port: config['zk']['port'],
+          timeout: config['zk']['timeout']
+        }
+        app.set :zk_outstanding_threshold, config['zk']['outstanding_threshold']
       end
     end
   end

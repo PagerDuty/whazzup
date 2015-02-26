@@ -40,25 +40,19 @@ describe 'Zookeeper health check' do
     expect(last_response.status).to be(200)
   end
 
-  it 'should be marked down if outstanding threshold is exceeded' do
-    Whazzup.set(:zk_outstanding_threshold, -1)
+  it 'should be marked down if the connect to Zookeeper is refused' do
+    allow_any_instance_of(Socket).to receive(:connect_nonblock).and_raise(Errno::ECONNREFUSED, 'mocking connection failure')
     get '/zk'
     expect(last_response.status).to be(503)
   end
 
-  it 'should be marked down if the connect to zookeeper times out' do
-    allow_any_instance_of(Timeout).to receive(:timeout).and_raise(Timeout::Error, 'mocking connection timeout')
+  it 'should be marked down if the connect to Zookeeper times out' do
+    allow_any_instance_of(ZookeeperHealthChecker).to receive(:connect).and_raise(IOError, 'mocking connection timeout')
     get '/zk'
     expect(last_response.status).to be(503)
   end
 
-  it 'should be marked down if the connect to zookeeper is refused' do
-    allow_any_instance_of(TCPSocket).to receive(:open).and_raise(Errno::ECONNREFUSED, 'mocking connection failure')
-    get '/zk'
-    expect(last_response.status).to be(503)
-  end
-
-  it 'should be marked down if zookeeper is unavailable' do
+  it 'should be marked down if Zookeeper is unavailable' do
     allow_any_instance_of(ZookeeperHealthChecker).to receive(:check).and_return(false)
     get '/zk'
     expect(last_response.status).to be(503)
