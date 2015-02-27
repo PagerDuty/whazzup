@@ -12,8 +12,7 @@ class ZookeeperHealthChecker
   # Returns an object that should be passed back to the client to give details
   # on the state of the service
   attr_reader :check_details
-
-  SRVR_NUMERIC_KEYS = Set.new %w(Received Sent Connections Outstanding Node\ Count)
+  SRVR_NUMERIC_KEYS = Set.new ["Received", "Sent", "Connections", "Outstanding", "Node Count"]
 
   def initialize(settings = {})
     self.hostname = settings.hostname
@@ -25,7 +24,7 @@ class ZookeeperHealthChecker
   def check
     logger.debug { 'Checking zk health' }
 
-    check_details = {available: false}
+    check_details = {'available' => false}
 
     srvr_data = get_srvr_data
 
