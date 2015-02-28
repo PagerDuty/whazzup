@@ -15,6 +15,10 @@ describe 'Zookeeper health check' do
     Whazzup.set(:hostname, 'test.local')
   end
 
+  let(:monit_should_restart_good) { "Leader: true\nruok: imok\nOverOutstandingThreshold: false\nWedged: false\n" }
+
+  let(:monit_should_restart_wedged) { "Leader: true\nruok: imok\nOverOutstandingThreshold: true\nWedged: true\n" }
+
   it 'should require and initialize checkers, and make a first check' do
     Whazzup.set(:services, [:zk])
     expect_any_instance_of(Whazzup).to receive(:require_relative).with 'lib/checkers/zookeeper_health_checker'
@@ -38,6 +42,22 @@ describe 'Zookeeper health check' do
   it 'should support the OPTIONS method for checking health (HAProxy default method)' do
     options '/zk'
     expect(last_response.status).to be(200)
+  end
+
+  it 'should return monit_should_restart if it is a good node' do
+    get '/zk/monit_should_restart'
+    expect(last_response.status).to be(200)
+  end
+
+  it 'should return monit_should_restart data if it is a good node' do
+    get '/zk/monit_should_restart'
+    expect(last_response.body).to eq(monit_should_restart_good)
+  end
+
+  it 'should return monit_should_restart wedged if node is wedged' do
+    Whazzup.set(:zk_outstanding_threshold, -1)
+    get '/zk/monit_should_restart'
+    expect(last_response.body).to eq(monit_should_restart_wedged)
   end
 
   it 'should be marked down if the connect to Zookeeper is refused' do

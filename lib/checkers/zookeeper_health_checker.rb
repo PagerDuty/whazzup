@@ -25,19 +25,29 @@ class ZookeeperHealthChecker
   def check
     logger.debug { 'Checking zk health' }
 
-    srvr_data = get_srvr_data
+    srvr_data = get_zk_data('srvr')
+    ruok_data = get_zk_data('ruok')
 
     # Failed to get any zk data so bail out
     if srvr_data.nil?
       @check_details = {'available' => false}
       return false
+    elsif ruok_data.nil?
+      @check_details = {'available' => true, 'ruok' => false}
+      return false
     end
 
     check_details = parse_srvr_data(srvr_data)
 
-    check_details['leader'] = ['leader', 'standalone'].include?(check_details['Mode'])
-
     check_details['over_outstanding_threshold'] = check_details['Outstanding'] > zk_outstanding_threshold
+    check_details['leader'] = ['leader', 'standalone'].include?(check_details['Mode'])
+    check_details['ruok'] = ruok_data[0]
+    check_details['wedged'] = check_details['leader'] && check_details['over_outstanding_threshold']
+
+    check_details['monit_should_restart_details'] = "Leader: #{check_details['leader']}\n"\
+                                                    "ruok: #{check_details['ruok']}\n"\
+                                                    "OverOutstandingThreshold: #{check_details['over_outstanding_threshold']}\n"\
+                                                    "Wedged: #{check_details['wedged']}\n"
 
     check_details['available'] = true
 
@@ -62,19 +72,19 @@ class ZookeeperHealthChecker
     result
   end
 
-  def get_srvr_data
+  def get_zk_data(cmd)
     host = zk_connection_settings[:host]
     port = zk_connection_settings[:port]
     timeout_time = zk_connection_settings[:timeout]
 
     begin
       s = connect(host, port, timeout_time)
-      s.send('srvr', 0)
+      s.send(cmd, 0)
 
       if IO.select([s], nil, nil, timeout_time)
         recv = s.read.split("\n")
       else
-        raise "Read timeout on connection to #{host}:#{port}"
+        raise "Read timeout for #{cmd} on connection to #{host}:#{port}"
         return nil
       end
     rescue Errno::ECONNREFUSED
