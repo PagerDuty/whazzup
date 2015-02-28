@@ -25,12 +25,13 @@ class ZookeeperHealthChecker
   def check
     logger.debug { 'Checking zk health' }
 
-    check_details = {'available' => false}
-
     srvr_data = get_srvr_data
 
     # Failed to get any zk data so bail out
-    return false if srvr_data.nil?
+    if srvr_data.nil?
+      @check_details = {'available' => false}
+      return false
+    end
 
     check_details = parse_srvr_data(srvr_data)
 
