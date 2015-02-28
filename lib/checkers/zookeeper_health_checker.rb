@@ -13,12 +13,13 @@ class ZookeeperHealthChecker
   # on the state of the service
   attr_reader :check_details
   SRVR_NUMERIC_KEYS = Set.new ["Received", "Sent", "Connections", "Outstanding", "Node Count"]
+  FIXNUM_MAX = (2**(0.size * 8 -2) -1)
 
   def initialize(settings = {})
     self.hostname = settings.hostname
     self.logger = settings.check_logger || Logger.new('/dev/null')
     self.zk_connection_settings = settings.zk_connection_settings
-    self.zk_outstanding_threshold = settings.zk_outstanding_threshold || 1000
+    self.zk_outstanding_threshold = settings.zk_outstanding_threshold || FIXNUM_MAX
   end
 
   def check
@@ -64,8 +65,17 @@ class ZookeeperHealthChecker
     host = zk_connection_settings[:host]
     port = zk_connection_settings[:port]
     timeout_time = zk_connection_settings[:timeout]
+
     begin
       s = connect(host, port, timeout_time)
+      s.send('srvr', 0)
+
+      if IO.select([s], nil, nil, timeout_time)
+        recv = s.read.split("\n")
+      else
+        raise "Read timeout on connection to #{host}:#{port}"
+        return nil
+      end
     rescue Errno::ECONNREFUSED
       logger.error { "Connection to #{host}:#{port} was refused" }
       return nil
@@ -75,16 +85,8 @@ class ZookeeperHealthChecker
     rescue => e
       logger.error { "#{e.message}\n#{e.backtrace.join("\n")}" }
       return nil
-    end
-
-    s.send('srvr', 0)
-
-    if IO.select([s], nil, nil, timeout_time)
-      recv = s.read.split("\n")
-      s.close
-    else
-      s.close
-      return nil
+    ensure
+      s.close if s
     end
 
     recv
