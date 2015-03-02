@@ -72,20 +72,24 @@ module Sinatra
 
         puts app.settings
 
-        app.set :connection_settings, {
-          host: 'localhost',
-          username: config['connection_settings']['username'],
-          password: config['connection_settings']['password'],
-          database: 'health_check',
-          reconnect: true
-        }
+        if config['connection_settings']
+          app.set :connection_settings, {
+            host: 'localhost',
+            username: config['connection_settings']['username'],
+            password: config['connection_settings']['password'],
+            database: 'health_check',
+            reconnect: true
+          }
+        end
 
-        app.set :zk_connection_settings, {
-          host: config['zk']['host'],
-          port: config['zk']['port'],
-          timeout: config['zk']['timeout']
-        }
-        app.set :zk_outstanding_threshold, config['zk']['outstanding_threshold']
+        if config['zk']
+          app.set :zk_connection_settings, {
+            host: config['zk']['host'],
+            port: config['zk']['port'],
+            timeout: config['zk']['timeout']
+          }
+          app.set :zk_outstanding_threshold, config['zk']['outstanding_threshold']
+        end
       end
     end
   end
