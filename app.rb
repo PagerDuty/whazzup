@@ -55,7 +55,8 @@ class Whazzup < Sinatra::Base
         service_checker: service_checker,
         max_staleness: settings.max_staleness,
         logger: settings.check_logger,
-        statsd: statsd
+        statsd: statsd,
+        service: service
       )
 
       # Ensure connection by firing an initial check

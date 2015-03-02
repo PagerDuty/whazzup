@@ -13,28 +13,24 @@ module Sinatra
         end
 
         app.get '/zk/monit_should_restart' do
-          check_zk_monit_should_restart
-        end
-      end
+          statsd.time('whazzup.zk.monit_should_restart') do
+            checker = settings.checkers[:zk]
 
-      def check_zk
-        statsd.time('whazzup.check_zk') do
-          checker = settings.checkers[:zk]
-
-          if checker.check
-            [200, JSON.generate(checker.check_details)]
-          else
-            [503, JSON.generate(checker.check_details)]
+            if checker.check
+              [200, checker.check_details['monit_should_restart_details']]
+            else
+              [503, JSON.generate(checker.check_details)]
+            end
           end
         end
       end
 
-      def check_zk_monit_should_restart
-        statsd.time('whazzup.check_zk_monit_should_restart') do
+      def check_zk
+        statsd.time('whazzup.zk.check') do
           checker = settings.checkers[:zk]
 
           if checker.check
-            [200, checker.check_details['monit_should_restart_details']]
+            [200, JSON.generate(checker.check_details)]
           else
             [503, JSON.generate(checker.check_details)]
           end

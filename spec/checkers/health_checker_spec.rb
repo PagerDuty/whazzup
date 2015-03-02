@@ -5,7 +5,7 @@ require 'checkers/health_checker'
 describe HealthChecker do
   let(:service_checker) { double }
   let(:statsd) { Statsd.new('0.0.0.0') }
-  let(:checker) { HealthChecker.new(service_checker: service_checker, max_staleness: 120, statsd: statsd) }
+  let(:checker) { HealthChecker.new(service_checker: service_checker, max_staleness: 120, statsd: statsd, service: :xdb) }
 
   after :each do
     checker.send :shutdown rescue nil
@@ -68,7 +68,7 @@ describe HealthChecker do
         allow(service_checker).to receive(:check_details).once { failed_check_details }
 
         expect(statsd).to receive(:event).with(
-          'whazzup.status_changed',
+          'whazzup.xdb.status_changed',
           'Status changed from available to unavailable'
         )
 
