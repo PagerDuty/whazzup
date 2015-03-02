@@ -15,7 +15,8 @@ require_relative 'config'
 class Whazzup < Sinatra::Base
 
   SERVICE_CHECKERS = {
-    xdb: 'GaleraHealthChecker'
+    xdb: 'GaleraHealthChecker',
+    zk: 'ZookeeperHealthChecker'
   }.freeze
 
   # General extention setup
@@ -27,6 +28,13 @@ class Whazzup < Sinatra::Base
     require_relative 'routes/xdb'
     register Sinatra::Routing::Xdb
     helpers Sinatra::Routing::Xdb
+  end
+
+  # ZK specific extention setup
+  if settings.services.include?(:zk)
+    require_relative 'routes/zk'
+    register Sinatra::Routing::Zk
+    helpers Sinatra::Routing::Zk
   end
 
   def initialize
@@ -47,7 +55,8 @@ class Whazzup < Sinatra::Base
         service_checker: service_checker,
         max_staleness: settings.max_staleness,
         logger: settings.check_logger,
-        statsd: statsd
+        statsd: statsd,
+        service: service
       )
 
       # Ensure connection by firing an initial check

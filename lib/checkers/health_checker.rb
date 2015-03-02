@@ -9,6 +9,7 @@ class HealthChecker
   def initialize(settings = {})
     @service_checker = settings[:service_checker]
     @max_staleness = settings[:max_staleness]
+    @service = settings[:service]
 
     self.logger = settings[:logger] || Logger.new('/dev/null')
     self.statsd = settings[:statsd]
@@ -107,14 +108,14 @@ class HealthChecker
   end
 
   def timed_check
-    statsd.time('whazzup.check_time') { @service_checker.check }
+    statsd.time("whazzup.#{@service}.check_time") { @service_checker.check }
   end
 
   def track_status_change
-    statsd.event('whazzup.status_changed', status_changed_message)
+    statsd.event("whazzup.#{@service}.status_changed", status_changed_message)
   end
 
   def track_current_status
-    statsd.gauge('whazzup.status', @last_check_results ? 1 : 0)
+    statsd.gauge("whazzup.#{@service}.status", @last_check_results ? 1 : 0)
   end
 end

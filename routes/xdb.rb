@@ -14,7 +14,7 @@ module Sinatra
       end
 
       def check_xdb
-        statsd.time('whazzup.check_xdb') do
+        statsd.time('whazzup.xdb.check') do
           checker = settings.checkers[:xdb]
 
           if checker.check
