@@ -54,10 +54,10 @@ describe 'Zookeeper health check' do
     expect(last_response.body).to eq(monit_should_restart_good)
   end
 
-  it 'should return monit_should_restart wedged if node is wedged' do
+  it 'should return 503 on monit_should_restart if node is wedged' do
     Whazzup.set(:zk_outstanding_threshold, -1)
     get '/zk/monit_should_restart'
-    expect(last_response.body).to eq(monit_should_restart_wedged)
+    expect(last_response.status).to be(503)
   end
 
   it 'should be marked down if the connect to Zookeeper is refused' do

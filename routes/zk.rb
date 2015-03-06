@@ -16,7 +16,7 @@ module Sinatra
           statsd.time('whazzup.zk.monit_should_restart') do
             checker = settings.checkers[:zk]
 
-            if checker.check
+            if checker.check && !checker.check_details['wedged']
               [200, checker.check_details['monit_should_restart_details']]
             else
               [503, JSON.generate(checker.check_details)]
