@@ -30,10 +30,10 @@ class ZookeeperHealthChecker
 
     # Failed to get any zk data so bail out
     if srvr_data.nil?
-      @check_details = {'available' => false}
+      @check_details = {'available' => false, 'monit_should_restart' => true}
       return false
     elsif ruok_data.nil?
-      @check_details = {'available' => true, 'ruok' => false}
+      @check_details = {'available' => true, 'ruok' => false, 'monit_should_restart' => true}
       return false
     end
 
@@ -50,6 +50,8 @@ class ZookeeperHealthChecker
                                                     "Wedged: #{check_details['wedged']}\n"
 
     check_details['available'] = true
+
+    check_details['monit_should_restart'] = check_details['wedged']
 
     @check_details = check_details
 
