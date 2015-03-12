@@ -68,9 +68,6 @@ class ZookeeperHealthChecker
 
   def parse_srvr_data(data)
     result = {}
-
-    return nil unless data.is_a?(Array)
-
     data.each do |l|
       k,v = l.split(': ')
       next if v.nil?
