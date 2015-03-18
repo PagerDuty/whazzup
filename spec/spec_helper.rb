@@ -6,12 +6,12 @@ require 'timecop'
 Timecop.freeze
 
 module CliSpecHelpers
-  def zk(args = nil, env = nil)
-    run_simple("#{env} #{zk_script} #{args}", false)
+  def zk(args = nil)
+    run_simple("#{zk_script} #{args}", false)
   end
 
   def zk_script
-    File.expand_path('../../lib/scripts/zk.rb', __FILE__)
+    File.expand_path('../../bin/zk_check', __FILE__)
   end
 end
 
