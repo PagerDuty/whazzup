@@ -1,10 +1,6 @@
-#!/usr/bin/env ruby
-
-project_root = ::File.expand_path(::File.dirname(::File.dirname(::File.dirname(__FILE__))))
-
 require 'yaml'
-
-require_relative "#{project_root}/lib/checkers/zookeeper_health_checker"
+require 'checkers/zookeeper_health_checker'
+require 'socket'
 
 class Settings
   attr_accessor :hostname
@@ -13,7 +9,7 @@ class Settings
   attr_accessor :zk_outstanding_threshold
 
   def initialize
-    @hostname = `hostname`.chomp
+    @hostname = Socket.gethostname
     @check_logger = ::Logger.new(STDOUT)
     @check_logger.level = ::Logger::INFO
 
@@ -82,5 +78,3 @@ class ZkCheck
     @kernel.exit(exitstatus)
   end
 end
-
-ZkCheck.new(ARGV.dup).execute!
