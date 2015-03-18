@@ -51,15 +51,22 @@ class Settings
   end
 end
 
-settings = Settings.new
+class ZkCheck
+  def initialize(argv, stdin=STDIN, stdout=STDOUT, stderr=STDERR, kernel=Kernel)
+    @argv, @stdin, @stdout, @stderr, @kernel = argv, stdin, stdout, stderr, kernel
+  end
 
-checker = ZookeeperHealthChecker.new(settings)
-checker.check
+  def execute!
+    settings = Settings.new
 
-monit_should_restart = checker.check_details['monit_should_restart']
+    checker = ZookeeperHealthChecker.new(settings)
+    checker.check
 
-if monit_should_restart
-  exit(1)
-else
-  exit(0)
+    monit_should_restart = checker.check_details['monit_should_restart']
+    exitstatus = !monit_should_restart
+
+    @kernel.exit(exitstatus)
+  end
 end
+
+ZkCheck.new(ARGV.dup).execute!
