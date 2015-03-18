@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+
 project_root = ::File.expand_path(::File.dirname(::File.dirname(::File.dirname(__FILE__))))
 
 require 'yaml'
@@ -16,11 +17,20 @@ class Settings
     @check_logger = ::Logger.new(STDOUT)
     @check_logger.level = ::Logger::INFO
 
-    if ENV['WHAZZUP_CONFIG']
-      if ::File.exist?(ENV['WHAZZUP_CONFIG'])
-        load_settings_from_file(ENV['WHAZZUP_CONFIG'])
+    config_file = ENV['WHAZZUP_CONFIG']
+
+    @check_logger.debug { "Config: #{config_file}" }
+
+    if config_file
+      if ::File.exist?(config_file)
+        begin
+          load_settings_from_file(config_file)
+        rescue
+          @check_logger.error { "#{config_file} is invalid!" }
+          exit(255)
+        end
       else
-        puts "Config file #{ENV['WHAZZUP_CONFIG']} does not exist! Using default settings..."
+        @check_logger.warn { "Config file #{config_file} does not exist! Using default settings..." }
         load_default_settings
       end
     else
@@ -28,7 +38,10 @@ class Settings
     end
   end
 
+  private
+
   def load_default_settings
+    @check_logger.debug { 'Loading config from defaults' }
     @zk_connection_settings = {
       host: 'localhost',
       port: 2181,
@@ -38,6 +51,7 @@ class Settings
   end
 
   def load_settings_from_file(filename)
+    @check_logger.debug { "Loading config from #{filename}" }
     config = ::YAML.load_file(filename)
 
     if config['zk']
