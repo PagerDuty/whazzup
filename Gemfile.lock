@@ -8,8 +8,21 @@ GEM
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
     addressable (2.3.7)
+    aruba (0.6.2)
+      childprocess (>= 0.3.6)
+      cucumber (>= 1.1.1)
+      rspec-expectations (>= 2.7.0)
     backports (3.6.4)
+    builder (3.2.2)
+    childprocess (0.5.5)
+      ffi (~> 1.0, >= 1.0.11)
     coderay (1.1.0)
+    cucumber (1.3.19)
+      builder (>= 2.1.2)
+      diff-lcs (>= 1.1.3)
+      gherkin (~> 2.12)
+      multi_json (>= 1.7.5, < 2.0)
+      multi_test (>= 0.1.2)
     diff-lcs (1.2.5)
     dogstatsd-ruby (1.4.1)
     ethon (0.7.3)
@@ -26,6 +39,8 @@ GEM
       multi_json (~> 1.0)
       net-http-persistent (>= 2.7)
       net-http-pipeline
+    gherkin (2.12.2)
+      multi_json (~> 1.3)
     highline (1.7.1)
     i18n (0.7.0)
     json (1.8.2)
@@ -34,6 +49,7 @@ GEM
     method_source (0.8.2)
     minitest (5.5.1)
     multi_json (1.10.1)
+    multi_test (0.1.2)
     multipart-post (2.0.0)
     mysql2 (0.3.18)
     net-http-persistent (2.9.4)
@@ -97,6 +113,7 @@ PLATFORMS
 
 DEPENDENCIES
   activesupport
+  aruba
   dogstatsd-ruby (~> 1.4.1)
   mysql2 (~> 0.3.16)
   pry

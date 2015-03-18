@@ -12,9 +12,10 @@ gem 'rack-test', groups: [:development, :test]
 gem 'pry', groups: [:development, :test]
 
 group :development do
+  gem 'aruba'
   gem 'rake'
-  gem 'travis'
   gem 'rb-readline'
+  gem 'travis'
 end
 
 group :test do
