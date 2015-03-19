@@ -23,7 +23,7 @@ class Settings
           load_settings_from_file(config_file)
         rescue
           @check_logger.error { "#{config_file} is invalid!" }
-          exit(255)
+          exit(1)
         end
       else
         @check_logger.warn { "Config file #{config_file} does not exist! Using default settings..." }
@@ -73,8 +73,9 @@ class ZkCheck
     checker.check
 
     monit_should_restart = checker.check_details['monit_should_restart']
-    exitstatus = !monit_should_restart
 
-    @kernel.exit(exitstatus)
+    exitstatus = monit_should_restart ? 255 : 0
+
+    exit(exitstatus)
   end
 end

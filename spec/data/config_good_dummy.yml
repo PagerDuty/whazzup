@@ -3,8 +3,8 @@ connection_settings:
   username: health_checker
   password: health_pass
 zk:
-  host: 0.0.0.0
-  port: 2181
+  host: localhost
+  port: 2180
   timeout: 5
   outstanding_threshold: 10
 services:

@@ -6,7 +6,13 @@ require 'timecop'
 Timecop.freeze
 
 module CliSpecHelpers
-  def zk(args = nil)
+  def zk(args = nil, env = nil)
+    restore_env
+    if env
+      env.each do |k,v|
+        set_env(k.to_s,v)
+      end
+    end
     run_simple("#{zk_script} #{args}", false)
   end
 
