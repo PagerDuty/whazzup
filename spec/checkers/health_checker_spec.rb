@@ -12,7 +12,6 @@ describe HealthChecker do
   end
 
   context 'initialization' do
-
     it 'should call perform_check during initialization' do
       expect(service_checker).to receive(:check).once
       expect(service_checker).to receive(:check_details).once
@@ -28,6 +27,7 @@ describe HealthChecker do
 
   context 'after initialization' do
     let(:check_details) { { up: true } }
+
     before :each do
       allow(service_checker).to receive(:check) { true }
       allow(service_checker).to receive(:check_details) { check_details }
@@ -43,11 +43,11 @@ describe HealthChecker do
     it 'multiple calls to check should not check the service' do
       expect(checker).not_to receive(:perform_check)
 
-      threads = 5.times.map {
+      threads = 5.times.map do
         Thread.new do
           checker.check
         end
-      }
+      end
 
       threads.each { |t| t.join }
     end
@@ -60,6 +60,7 @@ describe HealthChecker do
 
     context 'status changes' do
       let(:failed_check_details) { { up: false } }
+
       it 'should emit a statsd event' do
         allow(service_checker).to receive(:check).once { true }
         allow(service_checker).to receive(:check_details).once { check_details }
