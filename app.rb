@@ -13,7 +13,6 @@ require_relative 'lib/helpers/statsd_helper'
 require_relative 'config'
 
 class Whazzup < Sinatra::Base
-
   SERVICE_CHECKERS = {
     xdb: 'GaleraHealthChecker',
     zk: 'ZookeeperHealthChecker'
