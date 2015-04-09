@@ -78,6 +78,14 @@ Style/BlockEndNewline:
   Description: 'Put end statement of multiline block on its own line.'
   Enabled: false
 
+Style/BlockDelimiters:
+  Description: >-
+                Avoid using {...} for multi-line blocks (multiline chaining is
+                always ugly).
+                Prefer {...} over do...end for single-line blocks.
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#single-line-blocks'
+  Enabled: false
+
 Style/BracesAroundHashParameters:
   Description: 'Enforce braces style around hash parameters.'
   Enabled: false
@@ -120,9 +128,18 @@ Style/ClassVars:
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#no-class-vars'
   Enabled: false
 
+Style/ClosingParenthesisIndentation:
+  Description: 'Checks the indentation of hanging closing parentheses.'
+  Enabled: false
+
 Style/ColonMethodCall:
   Description: 'Do not use :: for method call.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#double-colons'
+  Enabled: false
+
+Style/CommandLiteral:
+  Description: 'Use `` or %x around command literals.'
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#percent-x'
   Enabled: false
 
 Style/CommentAnnotation:
@@ -226,13 +243,13 @@ Style/EvenOdd:
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#predicate-methods'
   Enabled: false
 
-Style/FirstParameterIndentation:
-  Description: 'Checks the indentation of the first parameter in a method call'
-  Enabled: false
-
 Style/FileName:
   Description: 'Use snake_case for source file names.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#snake-case-files'
+  Enabled: false
+
+Style/FirstParameterIndentation:
+  Description: 'Checks the indentation of the first parameter in a method call.'
   Enabled: false
 
 Style/FlipFlop:
@@ -486,11 +503,7 @@ Style/RedundantSelf:
   Enabled: false
 
 Style/RegexpLiteral:
-  Description: >-
-                 Use %r for regular expressions matching more than
-                 `MaxSlashes` '/' characters.
-                 Use %r only for regular expressions matching more than
-                 `MaxSlashes` '/' character.
+  Description: 'Use / or %r around regular expressions.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#percent-r'
   Enabled: false
 
@@ -603,7 +616,7 @@ Style/SpaceAroundEqualsInParameterDefault:
   Enabled: false
 
 Style/SpaceAroundOperators:
-  Description: 'Use spaces around operators.'
+  Description: 'Use a single space around operators.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#spaces-operators'
   Enabled: false
 
@@ -652,6 +665,10 @@ Style/StructInheritance:
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#no-extend-struct-new'
   Enabled: false
 
+Style/SymbolLiteral:
+  Description: 'Use plain symbols instead of string symbols when possible.'
+  Enabled: false
+
 Style/SymbolProc:
   Description: 'Use symbols as procs instead of blocks when possible.'
   Enabled: false
@@ -695,11 +712,6 @@ Style/UnneededCapitalW:
 Style/UnneededPercentQ:
   Description: 'Checks for %q/%Q when single quotes or double quotes would do.'
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#percent-q'
-  Enabled: false
-
-Style/UnneededPercentX:
-  Description: 'Checks for %x when `` would do.'
-  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#percent-x'
   Enabled: false
 
 Style/VariableInterpolation:
@@ -824,6 +836,10 @@ Lint/DeprecatedClassMethods:
   Description: 'Check for deprecated class method calls.'
   Enabled: false
 
+Lint/DuplicateMethods:
+  Description: 'Check for duplicate methods calls.'
+  Enabled: false
+
 Lint/ElseLayout:
   Description: 'Check for odd code arrangement in an else block.'
   Enabled: false
@@ -877,6 +893,10 @@ Lint/Loop:
                  Use Kernel#loop with break rather than begin/end/until or
                  begin/end/while for post-loop tests.
   StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#loop-with-break'
+  Enabled: false
+
+Lint/NonLocalExitFromIterator:
+  Description: 'Do not use return in iterator to cause non-local exit.'
   Enabled: false
 
 Lint/ParenthesesAsGroupedExpression:
@@ -957,10 +977,52 @@ Lint/Void:
   Description: 'Possible use of operator/literal/variable in void context.'
   Enabled: false
 
+##################### Performance #############################
+
+Performance/Detect:
+  Description: >-
+                  Use `detect` instead of `select.first`, `find_all.first`,
+                  `select.last`, and `find_all.last`.
+  Enabled: false
+
+Performance/FlatMap:
+  Description: >-
+                  Use `Enumerable#flat_map`
+                  instead of `Enumerable#map...Array#flatten(1)`
+                  or `Enumberable#collect..Array#flatten(1)`
+  Enabled: false
+  EnabledForFlattenWithoutParams: false
+  # If enabled, this cop will warn about usages of
+  # `flatten` being called without any parameters.
+  # This can be dangerous since `flat_map` will only flatten 1 level, and
+  # `flatten` without any parameters can flatten multiple levels.
+
+Performance/ReverseEach:
+  Description: 'Use `reverse_each` instead of `reverse.each`.'
+  Enabled: false
+
+Performance/Sample:
+  Description: >-
+                  Use `sample` instead of `shuffle.first`,
+                  `shuffle.last`, and `shuffle[Fixnum]`.
+  Enabled: false
+
+Performance/Size:
+  Description: >-
+                  Use `size` instead of `count` for counting
+                  the number of elements in `Array` and `Hash`.
+  Enabled: false
+
 ##################### Rails ##################################
 
 Rails/ActionFilter:
   Description: 'Enforces consistent use of action filter methods.'
+  Enabled: false
+
+Rails/Date:
+  Description: >-
+                  Checks the correct usage of date aware methods,
+                  such as Date.today, Date.current etc.
   Enabled: false
 
 Rails/DefaultScope:
@@ -969,6 +1031,14 @@ Rails/DefaultScope:
 
 Rails/Delegate:
   Description: 'Prefer delegate method for delegations.'
+  Enabled: false
+
+Rails/FindBy:
+  Description: 'Prefer find_by over where.first.'
+  Enabled: false
+
+Rails/FindEach:
+  Description: 'Prefer all.find_each over all.find.'
   Enabled: false
 
 Rails/HasAndBelongsToMany:
@@ -987,6 +1057,10 @@ Rails/ReadWriteAttribute:
 
 Rails/ScopeArgs:
   Description: 'Checks the arguments of ActiveRecord scopes.'
+  Enabled: false
+
+Rails/TimeZone:
+  Description: 'Checks the correct usage of time zone aware methods.'
   Enabled: false
 
 Rails/Validation:
