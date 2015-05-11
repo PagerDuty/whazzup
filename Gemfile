@@ -15,6 +15,7 @@ group :development do
   gem 'rake'
   gem 'travis'
   gem 'rb-readline'
+  gem 'rubocop'
 end
 
 group :test do
