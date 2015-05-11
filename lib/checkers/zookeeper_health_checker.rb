@@ -39,6 +39,12 @@ class ZookeeperHealthChecker
 
     check_details = parse_srvr_data(srvr_data)
 
+    # failed to parse the zk reponse so it might be still starting up
+    if check_details.nil?
+      @check_details = {'available' => false, 'monit_should_restart' => false}
+      return false
+    end
+
     check_details['over_outstanding_threshold'] = check_details['Outstanding'] > zk_outstanding_threshold
     check_details['leader'] = ['leader', 'standalone'].include?(check_details['Mode'])
     check_details['ruok'] = ruok_data[0]
@@ -64,6 +70,7 @@ class ZookeeperHealthChecker
     result = {}
     data.each do |l|
       k,v = l.split(': ')
+      next if v.nil?
       if SRVR_NUMERIC_KEYS.include?(k)
         result[k] = v.to_i
       else
@@ -71,6 +78,7 @@ class ZookeeperHealthChecker
       end
     end
 
+    return nil if result.empty?
     result
   end
 
