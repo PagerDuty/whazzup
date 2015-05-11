@@ -13,6 +13,10 @@ require_relative 'lib/helpers/statsd_helper'
 require_relative 'config'
 
 class Whazzup < Sinatra::Base
+  before do
+    env['rack.errors'] =  settings.error_logger
+  end
+
   SERVICE_CHECKERS = {
     xdb: 'GaleraHealthChecker',
     zk: 'ZookeeperHealthChecker'
