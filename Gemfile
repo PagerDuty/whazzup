@@ -13,12 +13,13 @@ gem 'pry', groups: [:development, :test]
 
 group :development do
   gem 'rake'
-  gem 'travis'
   gem 'rb-readline'
+  gem 'travis'
   gem 'rubocop'
 end
 
 group :test do
+  gem 'aruba'
   gem 'timecop'
 end
 
