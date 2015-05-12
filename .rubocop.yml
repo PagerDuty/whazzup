@@ -1,0 +1,164 @@
+inherit_from: .rubocop_disable_all.yml
+
+# No tabs allowed. Use 2 spaces.
+Style/Tab:
+  Enabled: true
+
+# Classes/Modules must use CamelCase, not Snake_Case.
+Style/ClassAndModuleCamelCase:
+  Enabled: true
+
+# Constants must use screaming snake case. Class definitions are exempt.
+Style/ConstantName:
+  Description: 'Constants should use SCREAMING_SNAKE_CASE.'
+  Enabled: true
+
+# No Windows line endings allowed.
+Style/EndOfLine:
+  Description: 'Use Unix-style line endings.'
+  Enabled: true
+
+# Just clearing out end of line noise. Easy to fix with rubocop --auto-correct
+Style/TrailingWhitespace:
+  Description: 'Avoid trailing whitespace.'
+  Enabled: true
+
+# Jam commas next to their variable. Can be autocorrected.
+#
+# eg.
+#     # bad
+#     [1 ,2]
+#
+#     # good
+#     [1, 2]
+Style/SpaceBeforeComma:
+  Description: 'No spaces before commas.'
+  Enabled: true
+
+# Checks that blocks are consistently aligned. Can be autocorrected.
+#
+# eg.
+#     # bad
+#     things.each do |t|
+#       puts t
+#       end
+#
+#     # good
+#     things.each do |t|
+#       puts t
+#     end
+Lint/BlockAlignment:
+  Description: 'Align block ends correctly.'
+  Enabled: true
+
+# Checks for calls to add a debugger breakpoint.
+Lint/Debugger:
+  Description: 'Check for debugger calls.'
+  Enabled: true
+
+# Checks that def/end are aligned correctly.
+#
+# eg.
+#     # bad
+#     def foo
+#       'foo'
+#       end
+#
+#     # good
+#     def foo
+#       'foo'
+#     end
+Lint/DefEndAlignment:
+  Description: 'Align ends corresponding to defs correctly.'
+  Enabled: true
+
+Style/ElseAlignment:
+  Description: 'Align elses and elsifs correctly.'
+  Enabled: true
+
+Style/EmptyElse:
+  Description: 'Avoid empty else-clauses.'
+  Enabled: true
+
+Style/SpaceInsideRangeLiteral:
+  Description: 'No spaces inside range literals.'
+  StyleGuide: 'https://github.com/bbatsov/ruby-style-guide#no-space-inside-range-literals'
+  Enabled: true
+
+# This cops checks if empty lines around the bodies of blocks match the configuration.
+#
+# eg.
+#     # bad
+#     something do
+#
+#       ...
+#     end
+#
+#     # good
+#     something do
+#       ...
+#     end
+Style/EmptyLinesAroundBlockBody:
+  Description: "Keeps track of empty lines around block bodies."
+  Enabled: true
+
+# This cops checks if empty lines around the bodies of classes match the configuration.
+#
+# eg.
+#     # bad
+#     class Test
+#
+#       def something
+#         ...
+#       end
+#
+#     end
+#
+#     # good
+#     class Test
+#       def something
+#         ...
+#       end
+#     end
+Style/EmptyLinesAroundClassBody:
+  Description: "Keeps track of empty lines around class bodies."
+  Enabled: true
+
+# This cops checks if empty lines around the bodies of modules match the configuration.
+#
+# eg.
+#     # bad
+#     module Test
+#
+#       def something
+#         ...
+#       end
+#
+#     end
+#
+#     # good
+#     module Test
+#       def something
+#         ...
+#       end
+#     end
+Style/EmptyLinesAroundModuleBody:
+  Description: "Keeps track of empty lines around module bodies."
+  Enabled: true
+
+# This cops checks if empty lines around the bodies of methods match the configuration.
+#
+# eg.
+#     # bad
+#     def something(arg)
+#
+#       ...
+#     end
+#
+#     # good
+#     def something(arg)
+#       ...
+#     end
+Style/EmptyLinesAroundMethodBody:
+  Description: "Keeps track of empty lines around method bodies."
+  Enabled: true

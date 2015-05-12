@@ -11,6 +11,11 @@ module Sinatra
         logger = ::Logger.new('log/check.log')
         logger.level = ::Logger::INFO
         app.set :check_logger, logger
+
+        error_logger = ::File.new(::File.join('log', 'error.log'), 'a+')
+        error_logger.sync = true
+        app.set :error_logger, error_logger
+
         app.set :checkers, {}
 
         app.set :max_staleness, 10

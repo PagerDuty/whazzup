@@ -62,6 +62,13 @@ describe 'Zookeeper health check' do
     expect(last_response.status).to be(503)
   end
 
+  it 'should be marked down if Zookeeper is not serving requests' do
+    Whazzup.set(:zk_outstanding_threshold, 10)
+    allow_any_instance_of(Socket).to receive(:read).and_return('This ZooKeeper instance is not currently serving requests')
+    get '/zk'
+    expect(last_response.status).to be(503)
+  end
+
   it 'should be marked down if the connect to Zookeeper is refused' do
     allow_any_instance_of(Socket).to receive(:connect_nonblock).and_raise(Errno::ECONNREFUSED, 'mocking connection failure')
     get '/zk'
