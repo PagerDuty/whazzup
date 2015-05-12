@@ -28,3 +28,7 @@ end
 group :xdb do
   gem 'mysql2', '~> 0.3.16'
 end
+
+group :zk do
+  gem 'zk'
+end

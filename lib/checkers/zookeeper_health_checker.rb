@@ -2,6 +2,8 @@ require 'logger'
 require 'socket'
 require 'timeout'
 
+require 'zk'
+
 class ZookeeperHealthChecker
   attr_accessor :hostname
   attr_accessor :zk_connection_settings
@@ -55,7 +57,8 @@ class ZookeeperHealthChecker
                                                     "OverOutstandingThreshold: #{check_details['over_outstanding_threshold']}\n"\
                                                     "Wedged: #{check_details['wedged']}\n"
 
-    check_details['available'] = true
+    check_passed = active_health_check(check_details)
+    check_details['available'] = check_passed
 
     check_details['monit_should_restart'] = check_details['wedged']
 
@@ -65,6 +68,20 @@ class ZookeeperHealthChecker
   end
 
   private
+
+  def active_health_check(check_details)
+    node_path = zk_client.create("/#{hostname}", ephemeral: true, sequential: true)
+    zk_client.delete(node_path)
+
+    true
+  rescue => e
+    logger.error { "Caught error during health check: #{e.inspect}\n#{e.backtrace.join("\n")}" }
+    false
+  end
+
+  def zk_client
+    @zk_client ||= ZK.new("#{zk_connection_settings[:host]}:#{zk_connection_settings[:port]}/whazzup")
+  end
 
   def parse_srvr_data(data)
     result = {}
