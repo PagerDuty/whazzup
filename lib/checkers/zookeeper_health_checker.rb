@@ -84,7 +84,8 @@ class ZookeeperHealthChecker
   end
 
   def zk_client
-    @zk_client ||= ZK.new("#{zk_connection_settings[:host]}:#{zk_connection_settings[:port]}/whazzup")
+    @zk_client ||= ZK.new("#{zk_connection_settings[:host]}:#{zk_connection_settings[:port]}/whazzup",
+                          timeout: zk_connection_settings[:timeout])
   end
 
   def parse_srvr_data(data)
