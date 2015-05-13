@@ -10,6 +10,7 @@ class ZookeeperHealthChecker
   attr_accessor :zk_outstanding_threshold
 
   attr_accessor :logger
+  attr_accessor :statsd
 
   # Returns an object that should be passed back to the client to give details
   # on the state of the service
@@ -19,7 +20,10 @@ class ZookeeperHealthChecker
 
   def initialize(settings = {})
     self.hostname = settings.hostname
+
     self.logger = settings.check_logger || Logger.new('/dev/null')
+    self.statsd = settings.statsd
+
     self.zk_connection_settings = settings.zk_connection_settings
     self.zk_outstanding_threshold = settings.zk_outstanding_threshold || FIXNUM_MAX
   end
@@ -57,7 +61,7 @@ class ZookeeperHealthChecker
                                                     "OverOutstandingThreshold: #{check_details['over_outstanding_threshold']}\n"\
                                                     "Wedged: #{check_details['wedged']}\n"
 
-    check_passed = active_health_check(check_details)
+    check_passed = statsd.time("whazzup.zk.active_health_check") { active_health_check(check_details) }
     check_details['available'] = check_passed
 
     check_details['monit_should_restart'] = check_details['wedged']
