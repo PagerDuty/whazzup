@@ -42,7 +42,13 @@ class Whazzup < Sinatra::Base
 
   def initialize
     super
+    initialize_statsd
     initialize_checkers
+  end
+
+  def initialize_statsd
+    Statsd.logger = settings.check_logger
+    Whazzup.set :statsd, statsd
   end
 
   def initialize_checkers
@@ -57,6 +63,7 @@ class Whazzup < Sinatra::Base
       settings.checkers[service] = HealthChecker.new(
         service_checker: service_checker,
         max_staleness: settings.max_staleness,
+        check_interval: settings.check_interval,
         logger: settings.check_logger,
         statsd: statsd,
         service: service

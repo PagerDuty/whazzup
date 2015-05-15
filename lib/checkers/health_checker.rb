@@ -14,7 +14,7 @@ class HealthChecker
     self.logger = settings[:logger] || Logger.new('/dev/null')
     self.statsd = settings[:statsd]
 
-    @check_interval = 1 # second
+    @check_interval = settings[:check_interval] || 1
 
     @last_check_time = nil
     @last_check_results = nil

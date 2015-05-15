@@ -2,12 +2,15 @@ require 'logger'
 require 'socket'
 require 'timeout'
 
+require 'zk'
+
 class ZookeeperHealthChecker
   attr_accessor :hostname
   attr_accessor :zk_connection_settings
   attr_accessor :zk_outstanding_threshold
 
   attr_accessor :logger
+  attr_accessor :statsd
 
   # Returns an object that should be passed back to the client to give details
   # on the state of the service
@@ -17,7 +20,10 @@ class ZookeeperHealthChecker
 
   def initialize(settings = {})
     self.hostname = settings.hostname
+
     self.logger = settings.check_logger || Logger.new('/dev/null')
+    self.statsd = settings.statsd
+
     self.zk_connection_settings = settings.zk_connection_settings
     self.zk_outstanding_threshold = settings.zk_outstanding_threshold || FIXNUM_MAX
   end
@@ -55,7 +61,8 @@ class ZookeeperHealthChecker
                                                     "OverOutstandingThreshold: #{check_details['over_outstanding_threshold']}\n"\
                                                     "Wedged: #{check_details['wedged']}\n"
 
-    check_details['available'] = true
+    check_passed = statsd.time("whazzup.zk.active_health_check") { active_health_check(check_details) }
+    check_details['available'] = check_passed
 
     check_details['monit_should_restart'] = check_details['wedged']
 
@@ -65,6 +72,21 @@ class ZookeeperHealthChecker
   end
 
   private
+
+  def active_health_check(check_details)
+    node_path = zk_client.create("/#{hostname}", ephemeral: true, sequential: true)
+    zk_client.delete(node_path)
+
+    true
+  rescue => e
+    logger.error { "Caught error during health check: #{e.inspect}\n#{e.backtrace.join("\n")}" }
+    false
+  end
+
+  def zk_client
+    @zk_client ||= ZK.new("#{zk_connection_settings[:host]}:#{zk_connection_settings[:port]}/whazzup",
+                          timeout: zk_connection_settings[:timeout])
+  end
 
   def parse_srvr_data(data)
     result = {}

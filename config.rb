@@ -19,6 +19,7 @@ module Sinatra
         app.set :checkers, {}
 
         app.set :max_staleness, 10
+        app.set :check_interval, 1
 
         app.set :statsd_host, '127.0.0.1'
         app.set :statsd_port, 8125
@@ -75,7 +76,7 @@ module Sinatra
         config = YAML.load_file ENV['WHAZZUP_CONFIG']
         app.set :services, config['services'].map(&:to_sym)
 
-        puts app.settings
+        app.set :check_interval, config['check_interval'].to_i if config['check_interval']
 
         if config['connection_settings']
           app.set :connection_settings, {
