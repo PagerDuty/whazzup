@@ -25,3 +25,33 @@ Check using `curl localhost:9201/<route>`
 - `/xdb` - XDB node status
 - `/zk` - ZK node status
 - `/zk/monit_should_restart` - ZK node status for triggering a Monit restart
+
+
+## XtraDB Cluster Configuration
+
+For an XtraDB cluster, you'll need to have a `health_check` database, and a `state` table in that database.
+
+In a pre-production or production environment, bring up a `mysql` console and execute the following statements:
+
+```
+create database if not exists health_check;
+create table if not exists health_check.state (
+  host_name varchar(128) not null,
+  available tinyint(1) not null default 1,
+  unique index (host_name));
+```
+
+Next, add an entry for all hosts in the cluster:
+
+```
+insert into health_check.state values ($HOSTNAME, 1);
+...
+```
+
+You can confirm that your cluster is correctly configured by running the `curl localhost:9201/xdb`:
+
+e.g.
+```
+$ curl localhost:9201/xdb
+{"wsrep_local_status":"Synced","cluster_size":3,"health_check.state":1,"available":true}
+```
