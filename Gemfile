@@ -1,7 +1,7 @@
 # A sample Gemfile
 source "https://rubygems.org"
 
-gem 'sinatra', '~> 1.4.5'
+gem 'sinatra', '~> 2.2.3'
 gem 'puma'
 
 gem 'dogstatsd-ruby', '~> 1.4.1'
